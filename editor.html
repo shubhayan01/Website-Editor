@@ -1,0 +1,1751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Site Editor — Hearing Aid Doctor</title>
+<style>
+  /* ── RESET & BASE ── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:       #0e0e16;
+    --surface:  #16161f;
+    --surface2: #1e1e2e;
+    --border:   rgba(255,255,255,0.07);
+    --accent:   #7c6aff;
+    --accent2:  #a78bfa;
+    --success:  #22d3a5;
+    --warn:     #f5a623;
+    --danger:   #f04060;
+    --text:     #e8e8f0;
+    --muted:    #6e6e8a;
+    --muted2:   #9999b8;
+    --panel-w:  320px;
+    --topbar-h: 52px;
+  }
+
+  html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; }
+
+  /* ── LOGIN SCREEN ── */
+  #login-screen {
+    position: fixed; inset: 0; z-index: 1000;
+    display: flex; align-items: center; justify-content: center;
+    background: radial-gradient(ellipse at 30% 30%, #1a1040 0%, #0a0a14 70%);
+  }
+
+  .login-wrap {
+    width: 400px;
+    background: var(--surface);
+    border: 1px solid rgba(124,106,255,0.25);
+    border-radius: 20px;
+    padding: 48px 40px;
+    text-align: center;
+    box-shadow: 0 40px 80px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.05);
+    animation: popIn 0.4s cubic-bezier(0.34,1.56,0.64,1);
+  }
+
+  @keyframes popIn { from { opacity:0; transform:scale(0.9) translateY(20px); } }
+
+  .login-icon {
+    width: 72px; height: 72px; border-radius: 20px; margin: 0 auto 24px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 32px;
+    box-shadow: 0 12px 40px rgba(124,106,255,0.4);
+  }
+
+  .login-title { font-size: 24px; font-weight: 800; color: #fff; margin-bottom: 6px; }
+  .login-sub { font-size: 13px; color: var(--muted); margin-bottom: 36px; }
+
+  .field { margin-bottom: 16px; text-align: left; }
+  .field label { display: block; font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px; }
+  .field input {
+    width: 100%; padding: 13px 16px;
+    background: rgba(255,255,255,0.04); border: 1px solid rgba(124,106,255,0.2);
+    border-radius: 10px; color: #fff; font-size: 15px; outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .field input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(124,106,255,0.15); }
+
+  .login-btn {
+    width: 100%; padding: 14px; border-radius: 12px; border: none; margin-top: 8px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #fff; font-size: 15px; font-weight: 700; cursor: pointer;
+    box-shadow: 0 8px 24px rgba(124,106,255,0.4);
+    transition: opacity 0.2s, transform 0.1s;
+  }
+  .login-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+  .login-btn:active { transform: translateY(0); }
+
+  .login-error { color: var(--danger); font-size: 13px; margin-top: 12px; min-height: 18px; }
+
+  .login-hint {
+    font-size: 12px; color: var(--muted); margin-top: 24px;
+    padding-top: 18px; border-top: 1px solid var(--border);
+  }
+  .login-hint code { background: rgba(124,106,255,0.15); padding: 2px 7px; border-radius: 4px; color: var(--accent2); font-family: monospace; }
+
+  /* ── APP SHELL (hidden until login) ── */
+  #app { display: none; flex-direction: column; height: 100%; }
+  #app.visible { display: flex; }
+
+  /* ── TOPBAR ── */
+  #topbar {
+    height: var(--topbar-h); flex-shrink: 0;
+    background: var(--surface); border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; padding: 0 16px; gap: 8px;
+    box-shadow: 0 2px 20px rgba(0,0,0,0.4);
+    z-index: 100;
+  }
+
+  .tb-brand { font-size: 14px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+  .tb-brand span { background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+  .tb-sep { width: 1px; height: 24px; background: var(--border); margin: 0 4px; flex-shrink: 0; }
+  .tb-spacer { flex: 1; }
+
+  .tb-btn {
+    padding: 7px 14px; border-radius: 8px; border: 1px solid var(--border);
+    background: rgba(255,255,255,0.04); color: var(--text);
+    font-size: 12.5px; font-weight: 600; cursor: pointer; white-space: nowrap;
+    display: flex; align-items: center; gap: 6px; transition: all 0.15s;
+    flex-shrink: 0;
+  }
+  .tb-btn:hover { background: rgba(255,255,255,0.08); border-color: rgba(124,106,255,0.4); }
+  .tb-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  .tb-btn.success { background: rgba(34,211,165,0.15); border-color: rgba(34,211,165,0.4); color: var(--success); }
+  .tb-btn.danger  { background: rgba(240,64,96,0.12);  border-color: rgba(240,64,96,0.35);  color: var(--danger); }
+  .tb-btn.primary { background: linear-gradient(135deg, var(--accent), var(--accent2)); border-color: transparent; color: #fff; box-shadow: 0 4px 14px rgba(124,106,255,0.35); }
+  .tb-btn.primary:hover { opacity: 0.9; }
+
+  .status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--success); flex-shrink: 0; }
+  .status-dot.warn { background: var(--warn); animation: blink 0.8s infinite; }
+  .status-dot.off  { background: var(--danger); }
+  @keyframes blink { 50% { opacity: 0.2; } }
+  #status-text { font-size: 12px; color: var(--muted); white-space: nowrap; }
+
+  /* ── BODY AREA: iframe + panel ── */
+  #body-area { flex: 1; display: flex; overflow: hidden; }
+
+  /* ── IFRAME WRAPPER ── */
+  #iframe-wrap {
+    flex: 1; position: relative; overflow: hidden;
+    background: #1a1a2a;
+  }
+
+  #site-frame {
+    width: 100%; height: 100%;
+    border: none;
+    transition: opacity 0.3s;
+  }
+
+  #iframe-overlay {
+    position: absolute; inset: 0;
+    z-index: 10; cursor: crosshair;
+    background: transparent;
+    display: none;
+  }
+
+  /* Edit-mode active: show overlay so clicks are intercepted */
+  #iframe-wrap.edit-mode #iframe-overlay { display: block; }
+
+  .frame-loading {
+    position: absolute; inset: 0; z-index: 5;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--bg); flex-direction: column; gap: 16px;
+  }
+  .spinner {
+    width: 40px; height: 40px; border-radius: 50%;
+    border: 3px solid var(--border); border-top-color: var(--accent);
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .frame-loading p { color: var(--muted); font-size: 13px; }
+
+  /* ── SIDE PANEL ── */
+  #panel {
+    width: var(--panel-w); flex-shrink: 0;
+    background: var(--surface); border-left: 1px solid var(--border);
+    display: flex; flex-direction: column; overflow: hidden;
+    box-shadow: -8px 0 32px rgba(0,0,0,0.4);
+  }
+
+  .panel-tabs {
+    display: flex; border-bottom: 1px solid var(--border); flex-shrink: 0;
+    flex-wrap: wrap;
+  }
+  .panel-tab {
+    flex: 1; padding: 10px 4px; background: transparent; border: none;
+    color: var(--muted); font-size: 11px; font-weight: 700; cursor: pointer;
+    text-transform: uppercase; letter-spacing: 0.5px; transition: all 0.15s;
+    border-bottom: 2px solid transparent; white-space: nowrap;
+    min-width: 0;
+  }
+  .panel-tab.active { color: var(--accent2); border-bottom-color: var(--accent); background: rgba(124,106,255,0.05); }
+
+  .panel-content { flex: 1; overflow-y: auto; padding: 16px; }
+  .panel-content::-webkit-scrollbar { width: 4px; }
+  .panel-content::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  /* Prop groups */
+  .prop-group { margin-bottom: 18px; }
+  .prop-label { font-size: 10.5px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px; }
+
+  .prop-input {
+    width: 100%; padding: 9px 12px; background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border); border-radius: 8px;
+    color: var(--text); font-size: 13px; outline: none;
+    transition: border-color 0.2s; resize: vertical; min-height: 36px;
+    font-family: inherit;
+  }
+  .prop-input:focus { border-color: var(--accent); }
+
+  .color-row { display: flex; gap: 8px; align-items: center; }
+  .color-swatch {
+    width: 34px; height: 34px; border-radius: 7px; border: 2px solid var(--border);
+    overflow: hidden; cursor: pointer; flex-shrink: 0;
+  }
+  .color-swatch input[type="color"] { width: 200%; height: 200%; margin: -50%; border: none; cursor: pointer; }
+
+  .range-wrap { display: flex; align-items: center; gap: 8px; }
+  .prop-range { flex: 1; accent-color: var(--accent); cursor: pointer; }
+  .range-val { font-size: 11px; color: var(--muted); width: 36px; text-align: right; flex-shrink: 0; }
+
+  .btn-row { display: flex; gap: 6px; }
+  .act-btn {
+    flex: 1; padding: 8px 6px; border-radius: 7px; border: 1px solid var(--border);
+    background: rgba(255,255,255,0.04); color: var(--text); font-size: 11.5px;
+    font-weight: 600; cursor: pointer; text-align: center; transition: all 0.15s;
+  }
+  .act-btn:hover { background: rgba(255,255,255,0.09); }
+  .act-btn.danger { border-color: rgba(240,64,96,0.3); color: var(--danger); }
+  .act-btn.danger:hover { background: rgba(240,64,96,0.1); }
+  .act-btn.success { border-color: rgba(34,211,165,0.3); color: var(--success); }
+  .act-btn.success:hover { background: rgba(34,211,165,0.08); }
+
+  /* Element tree list */
+  .el-tree { display: flex; flex-direction: column; gap: 3px; }
+  .el-item {
+    padding: 8px 10px; border-radius: 7px; border: 1px solid transparent;
+    cursor: pointer; font-size: 12.5px; color: var(--muted);
+    display: flex; align-items: center; gap: 8px; transition: all 0.12s;
+  }
+  .el-item:hover { background: rgba(255,255,255,0.04); border-color: var(--border); color: var(--text); }
+  .el-item.active { background: rgba(124,106,255,0.1); border-color: rgba(124,106,255,0.3); color: var(--accent2); }
+  .el-icon { font-size: 14px; flex-shrink: 0; }
+  .el-tag { font-size: 10px; background: rgba(255,255,255,0.06); padding: 1px 5px; border-radius: 3px; margin-left: auto; color: var(--muted); font-family: monospace; flex-shrink: 0; }
+
+  /* Section list */
+  .sec-item {
+    padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border);
+    background: rgba(255,255,255,0.02); margin-bottom: 6px;
+    display: flex; align-items: center; gap: 8px; cursor: pointer;
+    transition: all 0.15s;
+  }
+  .sec-item:hover { background: rgba(255,255,255,0.05); }
+  .sec-name { flex: 1; font-size: 13px; font-weight: 600; color: var(--text); }
+  .sec-actions { display: flex; gap: 4px; }
+  .sec-btn {
+    padding: 4px 8px; border-radius: 5px; border: none; font-size: 11px;
+    font-weight: 700; cursor: pointer; transition: all 0.12s;
+  }
+  .sec-btn.up, .sec-btn.dn { background: rgba(255,255,255,0.08); color: var(--text); }
+  .sec-btn.up:hover, .sec-btn.dn:hover { background: rgba(255,255,255,0.15); }
+  .sec-btn.del { background: rgba(240,64,96,0.15); color: var(--danger); }
+  .sec-btn.del:hover { background: rgba(240,64,96,0.25); }
+  .sec-btn.hide { background: rgba(245,166,35,0.15); color: var(--warn); }
+
+  /* Add section presets */
+  .preset-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+  .preset-card {
+    padding: 14px 10px; border-radius: 10px; border: 1px solid var(--border);
+    background: rgba(255,255,255,0.02); text-align: center; cursor: pointer;
+    transition: all 0.15s; color: var(--text); font-size: 12px; font-weight: 600;
+  }
+  .preset-card:hover { border-color: var(--accent); background: rgba(124,106,255,0.08); color: #fff; }
+  .preset-icon { font-size: 22px; display: block; margin-bottom: 6px; }
+
+  /* Empty state */
+  .empty-state {
+    text-align: center; padding: 40px 16px;
+    color: var(--muted); font-size: 13px; line-height: 1.7;
+  }
+  .empty-state .big { font-size: 36px; display: block; margin-bottom: 12px; }
+
+  /* Panel section header */
+  .panel-section-title {
+    font-size: 10px; font-weight: 800; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 1px;
+    padding: 8px 0 10px; border-bottom: 1px solid var(--border); margin-bottom: 14px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+
+  /* Toast */
+  #toast-wrap {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    z-index: 9999; display: flex; flex-direction: column; gap: 8px;
+    align-items: center; pointer-events: none;
+  }
+  .toast {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: 10px;
+    padding: 11px 20px; font-size: 13px; font-weight: 600; color: var(--text);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5); white-space: nowrap;
+    animation: slideUp 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  .toast.ok  { border-color: rgba(34,211,165,0.35); }
+  .toast.err { border-color: rgba(240,64,96,0.35); }
+  @keyframes slideUp { from { opacity:0; transform:translateY(12px); } }
+
+  /* Highlight box drawn over iframe */
+  #el-highlight {
+    position: fixed; pointer-events: none; z-index: 200;
+    border: 2px solid var(--accent); border-radius: 4px;
+    background: rgba(124,106,255,0.08);
+    box-shadow: 0 0 0 1px rgba(124,106,255,0.2);
+    display: none; transition: all 0.1s;
+  }
+
+  /* Mode badge */
+  .mode-badge {
+    padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .mode-badge.edit { background: rgba(124,106,255,0.2); color: var(--accent2); border: 1px solid rgba(124,106,255,0.3); }
+  .mode-badge.view { background: rgba(34,211,165,0.1); color: var(--success); border: 1px solid rgba(34,211,165,0.25); }
+
+  /* History bar */
+  .history-row { display: flex; gap: 6px; padding: 10px 16px; border-top: 1px solid var(--border); flex-shrink: 0; }
+  .hist-btn {
+    flex: 1; padding: 7px; border-radius: 7px; border: 1px solid var(--border);
+    background: rgba(255,255,255,0.03); color: var(--muted); font-size: 12px;
+    font-weight: 600; cursor: pointer; text-align: center; transition: all 0.12s;
+  }
+  .hist-btn:hover:not(:disabled) { background: rgba(255,255,255,0.07); color: var(--text); }
+  .hist-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+  /* Divider label */
+  .divider-label {
+    font-size: 10px; font-weight: 800; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 1px; margin: 16px 0 10px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .divider-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  /* ── SEO preview box ── */
+  .seo-preview-box {
+    margin-top: 16px; background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border); border-radius: 10px; padding: 14px;
+  }
+  .seo-preview-box .g-url   { font-size: 12px; color: #4caf92; margin-bottom: 2px; }
+  .seo-preview-box .g-title { font-size: 14px; color: #8ab4f8; font-weight: 600; margin-bottom: 4px; line-height: 1.3; }
+  .seo-preview-box .g-desc  { font-size: 12px; color: #bdc1c6; line-height: 1.5; }
+
+  /* ── SEO editor launch card ── */
+  .seo-launch-card {
+    background: linear-gradient(135deg, rgba(108,92,231,0.18), rgba(162,155,254,0.08));
+    border: 1px solid rgba(108,92,231,0.3);
+    border-radius: 14px;
+    padding: 20px 16px;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  .seo-launch-icon { font-size: 26px; margin-bottom: 10px; }
+  .seo-launch-title { font-weight: 800; font-size: 14px; color: #fff; margin-bottom: 5px; }
+  .seo-launch-sub {
+    font-size: 11.5px; color: var(--muted2, #9999b8); line-height: 1.6; margin-bottom: 14px;
+  }
+  .seo-launch-btn {
+    width: 100%; padding: 10px 0; border-radius: 9px; border: none;
+    background: linear-gradient(135deg, #6c5ce7, #8e7bff);
+    color: #fff; font-size: 13px; font-weight: 700; cursor: pointer;
+    box-shadow: 0 4px 16px rgba(108,92,231,0.35);
+    font-family: inherit; letter-spacing: 0.2px;
+    transition: opacity 0.15s;
+  }
+  .seo-launch-btn:hover { opacity: 0.88; }
+
+  /* ── Media gallery grid ── */
+  .media-gallery {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 4px;
+  }
+  .media-thumb {
+    border: 1px solid var(--border); border-radius: 8px; overflow: hidden;
+    cursor: pointer; position: relative; transition: border-color 0.15s;
+  }
+  .media-thumb:hover { border-color: var(--accent); }
+  .media-thumb img { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; }
+  .media-thumb-name { font-size: 9px; color: var(--muted); padding: 4px 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  /* ── Spacing grid ── */
+  .spacing-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .spacing-cell { display: flex; flex-direction: column; gap: 3px; }
+  .spacing-label { font-size: 9px; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+  .spacing-input {
+    padding: 6px 10px; background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border); border-radius: 6px;
+    color: var(--text); font-size: 13px; outline: none; width: 100%;
+    transition: border-color 0.2s;
+  }
+  .spacing-input:focus { border-color: var(--accent); }
+
+  /* ── Logo preview ── */
+  .logo-preview-box {
+    min-height: 56px; display: flex; align-items: center; justify-content: center;
+    background: rgba(255,255,255,0.03); border: 1px dashed var(--border);
+    border-radius: 8px; padding: 10px; margin-bottom: 10px; overflow: hidden;
+  }
+
+  /* counter badge for SEO char counts */
+  .char-counter {
+    font-size: 10px; color: var(--muted); margin-top: 4px; text-align: right;
+  }
+  .char-counter.warn  { color: var(--warn); }
+  .char-counter.over  { color: var(--danger); font-weight: 700; }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════
+     LOGIN SCREEN
+══════════════════════════════════════════════ -->
+<div id="login-screen">
+  <div class="login-wrap">
+    <div class="login-icon">✏️</div>
+    <div class="login-title">Site Editor</div>
+    <div class="login-sub">The Hearing Aid Doctor — Admin Access</div>
+    <div class="field">
+      <label>Username</label>
+      <input type="text" id="inp-user" placeholder="admin" autocomplete="username">
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <input type="password" id="inp-pass" placeholder="••••••••••••" autocomplete="current-password">
+    </div>
+    <button class="login-btn" id="login-btn">→ Enter Editor</button>
+    <div class="login-error" id="login-error"></div>
+    <div class="login-hint">
+      Default: <code>admin</code> / <code>hearingdoctor2026</code><br>
+      <span style="font-size:11px;margin-top:6px;display:block">Change in server.js → ED_USER / ED_PASS</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     APP SHELL
+══════════════════════════════════════════════ -->
+<div id="app">
+
+  <!-- TOPBAR -->
+  <div id="topbar">
+    <div class="tb-brand">✏️ <span>Site Editor</span></div>
+    <div class="tb-sep"></div>
+
+    <button class="tb-btn" id="btn-mode" onclick="toggleEditMode()">🖱 Enable Editing</button>
+    <div class="tb-sep"></div>
+    <button class="tb-btn" onclick="reloadFrame()" title="Reload preview">⟳ Reload</button>
+    <button class="tb-btn" onclick="openSite()" title="Open site in new tab">↗ View Site</button>
+    <button class="tb-btn" onclick="openSEOEditor()" title="Open SEO Editor" style="border-color:rgba(108,92,231,0.4);color:var(--accent2)">🔍 SEO Editor</button>
+
+    <div class="tb-spacer"></div>
+
+    <div class="status-dot" id="status-dot"></div>
+    <span id="status-text">Ready</span>
+    <div class="tb-sep"></div>
+
+    <button class="tb-btn success" id="btn-save" onclick="saveChanges()">💾 Save</button>
+    <button class="tb-btn danger" onclick="doLogout()">✕ Logout</button>
+  </div>
+
+  <!-- BODY -->
+  <div id="body-area">
+
+    <!-- IFRAME -->
+    <div id="iframe-wrap">
+      <div class="frame-loading" id="frame-loading">
+        <div class="spinner"></div>
+        <p>Loading site preview…</p>
+      </div>
+      <iframe id="site-frame" src="/" title="Site Preview"></iframe>
+      <!-- Transparent overlay to intercept clicks in edit mode -->
+      <div id="iframe-overlay" onclick="handleOverlayClick(event)"></div>
+    </div>
+
+    <!-- ELEMENT HIGHLIGHT -->
+    <div id="el-highlight"></div>
+
+    <!-- SIDE PANEL -->
+    <div id="panel">
+      <div class="panel-tabs">
+        <button class="panel-tab active" onclick="switchTab('edit')"     id="tab-edit">✏️ Edit</button>
+        <button class="panel-tab"        onclick="switchTab('sections')" id="tab-sections">📑 Sections</button>
+        <button class="panel-tab"        onclick="switchTab('add')"      id="tab-add">＋ Add</button>
+        <button class="panel-tab"        onclick="switchTab('images')"   id="tab-images">🖼 Media</button>
+        <button class="panel-tab"        onclick="switchTab('seo')"      id="tab-seo">🔍 SEO</button>
+      </div>
+
+      <!-- ── EDIT TAB ── -->
+      <div class="panel-content" id="panel-edit">
+        <div class="empty-state">
+          <span class="big">👆</span>
+          Enable editing, then click<br>any element on the page<br>to edit it here.
+        </div>
+      </div>
+
+      <!-- ── SECTIONS TAB ── -->
+      <div class="panel-content" id="panel-sections" style="display:none">
+        <div class="panel-section-title">Page Sections <button class="act-btn" style="padding:3px 8px;font-size:10px" onclick="refreshSectionList()">↻ Refresh</button></div>
+        <div id="section-list"><div class="empty-state"><span class="big">📑</span>Click ↻ Refresh to load sections.</div></div>
+      </div>
+
+      <!-- ── ADD TAB ── -->
+      <div class="panel-content" id="panel-add" style="display:none">
+        <div class="panel-section-title">Insert New Section</div>
+        <div class="preset-grid" id="preset-grid"></div>
+      </div>
+
+      <!-- ── MEDIA / LOGO TAB ── -->
+      <div class="panel-content" id="panel-images" style="display:none">
+
+        <div class="panel-section-title">Logo &amp; Media</div>
+
+        <div class="prop-group">
+          <div class="prop-label">Site Logo</div>
+          <div class="logo-preview-box" id="logo-preview">
+            <span style="color:var(--muted);font-size:12px">No logo detected</span>
+          </div>
+          <input type="file" id="logo-upload-input" accept="image/*" style="display:none" onchange="handleLogoUpload(event)">
+          <div class="btn-row" style="margin-bottom:10px">
+            <button class="act-btn success" onclick="document.getElementById('logo-upload-input').click()">📁 Upload Logo</button>
+            <button class="act-btn danger" onclick="removeLogo()">✕ Remove</button>
+          </div>
+          <div class="prop-label">Logo Width</div>
+          <div class="range-wrap">
+            <input type="range" class="prop-range" min="40" max="400" value="160" id="logo-width-range"
+              oninput="applyLogoWidth(this.value); document.getElementById('logo-width-val').textContent=this.value+'px'">
+            <span class="range-val" id="logo-width-val">160px</span>
+          </div>
+        </div>
+
+        <div class="divider-label">Insert Image into Section</div>
+
+        <div class="prop-group">
+          <div class="prop-label">Target Section</div>
+          <select class="prop-input" id="img-target-section" style="margin-bottom:8px">
+            <option value="">— pick a section —</option>
+          </select>
+
+          <div class="prop-label" style="margin-top:8px">Position</div>
+          <select class="prop-input" id="img-position" style="margin-bottom:8px">
+            <option value="append">Append (end of section)</option>
+            <option value="prepend">Prepend (start of section)</option>
+          </select>
+
+          <div class="prop-label" style="margin-top:8px">Image Width</div>
+          <input class="prop-input" type="text" id="img-insert-width" placeholder="100% / 300px / auto" value="100%" style="margin-bottom:10px">
+
+          <input type="file" id="img-section-upload" accept="image/*" style="display:none" onchange="handleSectionImageUpload(event)">
+          <button class="act-btn success" style="width:100%" onclick="triggerSectionImageUpload()">📤 Upload &amp; Insert Image</button>
+        </div>
+
+        <div class="divider-label">Uploaded Images</div>
+        <div class="media-gallery" id="media-gallery">
+          <div style="grid-column:1/-1;text-align:center;padding:16px;color:var(--muted);font-size:12px">
+            Click ↻ to load gallery
+          </div>
+        </div>
+        <button class="act-btn" style="width:100%;margin-top:10px" onclick="loadMediaGallery()">↻ Refresh Gallery</button>
+      </div>
+
+      <!-- ── SEO TAB ── -->
+      <div class="panel-content" id="panel-seo" style="display:none">
+
+        <div class="panel-section-title">
+          SEO Settings
+          <button class="act-btn success" style="padding:3px 10px;font-size:10px;flex:0" onclick="saveSEO()">✓ Apply</button>
+        </div>
+
+        <!-- ══ SEO EDITOR LAUNCH CARD ══ -->
+        <div class="seo-launch-card">
+          <div class="seo-launch-icon">🔍</div>
+          <div class="seo-launch-title">Advanced SEO Editor</div>
+          <div class="seo-launch-sub">
+            Schema markup · Social cards · Redirect rules<br>
+            robots.txt · Sitemap ping · Full SEO audit
+          </div>
+          <button class="seo-launch-btn" onclick="openSEOEditor()">
+            Open SEO Editor →
+          </button>
+        </div>
+
+        
+
+      <!-- Undo/Redo always visible -->
+      <div class="history-row">
+        <button class="hist-btn" id="btn-undo" onclick="doUndo()" disabled>↩ Undo</button>
+        <button class="hist-btn" id="btn-redo" onclick="doRedo()" disabled>↪ Redo</button>
+      </div>
+    </div>
+
+  </div><!-- /body-area -->
+</div><!-- /app -->
+
+<!-- TOAST -->
+<div id="toast-wrap"></div>
+
+<script>
+"use strict";
+
+/* ══════════════════════════════════════════════════════
+   CONFIG
+══════════════════════════════════════════════════════ */
+const CFG = {
+  user: "admin",
+  pass: "hearingdoctor2026",
+  server: "",          // relative URLs — same origin as /admin
+  autosaveDelay: 2500,
+};
+
+/* ══════════════════════════════════════════════════════
+   STATE
+══════════════════════════════════════════════════════ */
+const S = {
+  authHeader: "",
+  editMode: false,
+  selectedPath: null,
+  selectedInfo: null,
+  history: [],
+  histIdx: -1,
+  dirty: false,
+  autosaveTimer: null,
+  currentTab: "edit",
+};
+
+/* ══════════════════════════════════════════════════════
+   LOGIN
+══════════════════════════════════════════════════════ */
+document.getElementById("inp-pass").addEventListener("keydown", e => { if (e.key === "Enter") doLogin(); });
+document.getElementById("login-btn").addEventListener("click", doLogin);
+
+function doLogin() {
+  const u = document.getElementById("inp-user").value.trim();
+  const p = document.getElementById("inp-pass").value;
+  const err = document.getElementById("login-error");
+
+  if (u === CFG.user && p === CFG.pass) {
+    err.textContent = "";
+    S.authHeader = btoa(u + ":" + p);
+    document.getElementById("login-screen").style.display = "none";
+    document.getElementById("app").classList.add("visible");
+    initApp();
+  } else {
+    err.textContent = "Incorrect credentials. Please try again.";
+    document.getElementById("inp-pass").value = "";
+    document.getElementById("inp-pass").focus();
+  }
+}
+
+/* ══════════════════════════════════════════════════════
+   INIT
+══════════════════════════════════════════════════════ */
+function initApp() {
+  buildPresetGrid();
+  checkServer();
+
+  const frame = document.getElementById("site-frame");
+  let loadHandled = false;
+
+  function onFrameReady() {
+    if (loadHandled) return;
+    const doc = frame.contentDocument;
+    if (!doc || doc.readyState === "loading") return;
+    if (doc.body && (doc.body.children.length > 0 || doc.title)) {
+      loadHandled = true;
+      document.getElementById("frame-loading").style.display = "none";
+      toast("✅ Site loaded", "ok");
+      takeSnapshot();
+      updateUndoRedo();
+    }
+  }
+
+  frame.addEventListener("load", () => {
+    setTimeout(onFrameReady, 100);
+    setTimeout(onFrameReady, 500);
+    setTimeout(onFrameReady, 1500);
+  });
+
+  const pollTimer = setInterval(() => {
+    if (loadHandled) { clearInterval(pollTimer); return; }
+    onFrameReady();
+  }, 300);
+
+  setTimeout(() => {
+    clearInterval(pollTimer);
+    if (!loadHandled) {
+      const fl = document.getElementById("frame-loading");
+      fl.innerHTML = `
+        <p style="color:var(--warn);text-align:center;padding:24px">
+          ⚠️ Site preview timed out.<br>
+          <small style="color:var(--muted)">Make sure index.html exists<br>and the server is running.</small>
+        </p>
+        <button class="tb-btn" onclick="reloadFrame()" style="margin-top:12px">⟳ Retry</button>`;
+    }
+  }, 15000);
+
+  frame.addEventListener("error", () => {
+    document.getElementById("frame-loading").innerHTML = "<p style='color:var(--danger)'>Failed to load site. Is index.html present?</p>";
+  });
+}
+
+async function checkServer() {
+  try {
+    const r = await fetch(CFG.server + "/ping", { signal: AbortSignal.timeout(3000) });
+    if (r.ok) setStatus("ok", "Server connected");
+    else setStatus("warn", "Server issue");
+  } catch {
+    setStatus("off", "Server offline — save won't work");
+    toast("⚠️ Server not reachable — check node server.js is running", "err");
+  }
+}
+
+/* ══════════════════════════════════════════════════════
+   IFRAME HELPERS
+══════════════════════════════════════════════════════ */
+function getDoc() {
+  try { return document.getElementById("site-frame").contentDocument; }
+  catch(e) { return null; }
+}
+function getWin() {
+  try { return document.getElementById("site-frame").contentWindow; }
+  catch(e) { return null; }
+}
+
+function reloadFrame() {
+  const fl = document.getElementById("frame-loading");
+  fl.style.display = "flex";
+  fl.innerHTML = '<div class="spinner"></div><p>Reloading…</p>';
+  document.getElementById("site-frame").src = "/?" + Date.now();
+  setEditMode(false);
+}
+
+function openSite() { window.open("/", "_blank"); }
+
+/* ══════════════════════════════════════════════════════
+   EDIT MODE TOGGLE
+══════════════════════════════════════════════════════ */
+function toggleEditMode() { setEditMode(!S.editMode); }
+
+function setEditMode(on) {
+  S.editMode = on;
+  const btn = document.getElementById("btn-mode");
+  const wrap = document.getElementById("iframe-wrap");
+
+  if (on) {
+    btn.textContent = "🚫 Disable Editing";
+    btn.classList.add("success");
+    wrap.classList.add("edit-mode");
+    injectHoverStyles();
+    toast("✏️ Click any element to edit it", "ok");
+  } else {
+    btn.textContent = "🖱 Enable Editing";
+    btn.classList.remove("success");
+    wrap.classList.remove("edit-mode");
+    clearHighlight();
+    removeHoverStyles();
+  }
+}
+
+function injectHoverStyles() {
+  const doc = getDoc(); if (!doc) return;
+  if (doc.getElementById("__editor-styles")) return;
+  const s = doc.createElement("style");
+  s.id = "__editor-styles";
+  s.textContent = `
+    .__ed-hover { outline: 2px dashed rgba(124,106,255,0.7) !important; cursor: crosshair !important; }
+    .__ed-selected { outline: 2px solid #7c6aff !important; }
+  `;
+  doc.head.appendChild(s);
+}
+
+function removeHoverStyles() {
+  const doc = getDoc(); if (!doc) return;
+  const s = doc.getElementById("__editor-styles");
+  if (s) s.remove();
+  doc.querySelectorAll(".__ed-hover,.__ed-selected").forEach(el => {
+    el.classList.remove("__ed-hover","__ed-selected");
+  });
+}
+
+/* ══════════════════════════════════════════════════════
+   OVERLAY CLICK → element picking
+══════════════════════════════════════════════════════ */
+function handleOverlayClick(e) {
+  if (!S.editMode) return;
+
+  const frame = document.getElementById("site-frame");
+  const rect  = frame.getBoundingClientRect();
+  const ix    = e.clientX - rect.left;
+  const iy    = e.clientY - rect.top;
+
+  const doc = getDoc();
+  if (!doc) return;
+
+  const overlay = document.getElementById("iframe-overlay");
+  overlay.style.display = "none";
+  const frameEl = doc.elementFromPoint(ix, iy);
+  overlay.style.display = "block";
+
+  if (!frameEl || frameEl === doc.body || frameEl === doc.documentElement) {
+    clearSelection();
+    return;
+  }
+
+  selectElement(frameEl);
+}
+
+document.getElementById("iframe-overlay").addEventListener("mousemove", e => {
+  if (!S.editMode) return;
+  const frame = document.getElementById("site-frame");
+  const rect  = frame.getBoundingClientRect();
+  const ix = e.clientX - rect.left;
+  const iy = e.clientY - rect.top;
+  const doc = getDoc(); if (!doc) return;
+
+  const overlay = document.getElementById("iframe-overlay");
+  overlay.style.display = "none";
+  const el = doc.elementFromPoint(ix, iy);
+  overlay.style.display = "block";
+
+  doc.querySelectorAll(".__ed-hover").forEach(x => x.classList.remove("__ed-hover"));
+  if (el && el !== doc.body && el !== doc.documentElement) {
+    el.classList.add("__ed-hover");
+    drawHighlight(el, rect);
+  } else {
+    clearHighlight();
+  }
+});
+
+document.getElementById("iframe-overlay").addEventListener("mouseleave", () => {
+  const doc = getDoc(); if (!doc) return;
+  doc.querySelectorAll(".__ed-hover").forEach(x => x.classList.remove("__ed-hover"));
+  clearHighlight();
+});
+
+function drawHighlight(el, frameRect) {
+  const box = el.getBoundingClientRect();
+  const h   = document.getElementById("el-highlight");
+  h.style.display = "block";
+  h.style.left    = (frameRect.left + box.left) + "px";
+  h.style.top     = (frameRect.top  + box.top)  + "px";
+  h.style.width   = box.width  + "px";
+  h.style.height  = box.height + "px";
+}
+
+function clearHighlight() {
+  document.getElementById("el-highlight").style.display = "none";
+}
+
+/* ══════════════════════════════════════════════════════
+   ELEMENT SELECTION & PANEL
+══════════════════════════════════════════════════════ */
+function getElementPath(el) {
+  const doc = getDoc();
+  if (!el || el === doc.body) return "body";
+  const idx = Array.from(el.parentNode.children).indexOf(el);
+  return getElementPath(el.parentNode) + " > " + el.tagName.toLowerCase() + ":nth-child(" + (idx+1) + ")";
+}
+
+function selectElement(el) {
+  const doc = getDoc();
+  doc.querySelectorAll(".__ed-selected").forEach(x => x.classList.remove("__ed-selected"));
+  el.classList.add("__ed-selected");
+
+  S.selectedPath = getElementPath(el);
+
+  const cs   = getWin().getComputedStyle(el);
+  const tag  = el.tagName.toLowerCase();
+  const type = ["img","picture","video"].includes(tag) ? "image" : "text";
+
+  S.selectedInfo = { el, tag, type };
+
+  switchTab("edit");
+  buildEditPanel(el, type, cs);
+}
+
+function clearSelection() {
+  const doc = getDoc(); if (!doc) return;
+  doc.querySelectorAll(".__ed-selected").forEach(x => x.classList.remove("__ed-selected"));
+  S.selectedPath = null;
+  S.selectedInfo = null;
+  document.getElementById("panel-edit").innerHTML = `
+    <div class="empty-state">
+      <span class="big">👆</span>
+      Enable editing, then click<br>any element on the page<br>to edit it here.
+    </div>`;
+}
+
+/* ══════════════════════════════════════════════════════
+   BUILD EDIT PANEL
+══════════════════════════════════════════════════════ */
+function buildEditPanel(el, type, cs) {
+  const tag   = el.tagName.toLowerCase();
+  const isImg = type === "image";
+
+  const fsVal = parseInt(cs.fontSize) || 16;
+  const fwVal = cs.fontWeight || "400";
+  const col   = rgbToHex(cs.color);
+  const bg    = cs.backgroundColor && cs.backgroundColor !== "rgba(0, 0, 0, 0)" ? rgbToHex(cs.backgroundColor) : "#ffffff";
+
+  const ptop  = parseInt(cs.paddingTop)    || 0;
+  const pbot  = parseInt(cs.paddingBottom) || 0;
+  const pleft = parseInt(cs.paddingLeft)   || 0;
+  const prght = parseInt(cs.paddingRight)  || 0;
+  const mtop  = parseInt(cs.marginTop)     || 0;
+  const mbot  = parseInt(cs.marginBottom)  || 0;
+  const mleft = parseInt(cs.marginLeft)    || 0;
+  const mrght = parseInt(cs.marginRight)   || 0;
+
+  let html = `<div class="panel-section-title">${isImg ? "🖼 Image" : "✏️ " + tag.toUpperCase()} <span style="font-weight:400;color:var(--muted);text-transform:none;font-size:10px">${tag}</span></div>`;
+
+  if (!isImg) {
+    html += `
+      <div class="prop-group">
+        <div class="prop-label">Content</div>
+        <textarea class="prop-input" rows="3" id="pe-text" oninput="applyText(this.value)">${el.innerText || el.textContent}</textarea>
+      </div>
+      <div class="prop-group">
+        <div class="prop-label">Text Color</div>
+        <div class="color-row">
+          <div class="color-swatch"><input type="color" value="${col}" oninput="applyStyle('color',this.value)" id="pe-color"></div>
+          <span style="font-size:12px;color:var(--muted)">Pick color</span>
+        </div>
+      </div>
+      <div class="prop-group">
+        <div class="prop-label">Font Size</div>
+        <div class="range-wrap">
+          <input type="range" class="prop-range" min="10" max="100" value="${fsVal}" oninput="applyStyle('fontSize',this.value+'px');document.getElementById('pe-fs').textContent=this.value+'px'">
+          <span class="range-val" id="pe-fs">${fsVal}px</span>
+        </div>
+      </div>
+      <div class="prop-group">
+        <div class="prop-label">Font Weight</div>
+        <select class="prop-input" onchange="applyStyle('fontWeight',this.value)">
+          <option value="300" ${fwVal=="300"?"selected":""}>Light (300)</option>
+          <option value="400" ${fwVal=="400"?"selected":""}>Regular (400)</option>
+          <option value="600" ${fwVal=="600"?"selected":""}>Semibold (600)</option>
+          <option value="700" ${fwVal=="700"?"selected":""}>Bold (700)</option>
+          <option value="800" ${fwVal=="800"?"selected":""}>Extrabold (800)</option>
+        </select>
+      </div>
+      <div class="prop-group">
+        <div class="prop-label">Alignment</div>
+        <div class="btn-row">
+          <button class="act-btn" onclick="applyStyle('textAlign','left')">◀ Left</button>
+          <button class="act-btn" onclick="applyStyle('textAlign','center')">≡ Center</button>
+          <button class="act-btn" onclick="applyStyle('textAlign','right')">Right ▶</button>
+        </div>
+      </div>
+      <div class="prop-group">
+        <div class="prop-label">Background</div>
+        <div class="color-row">
+          <div class="color-swatch"><input type="color" value="${bg}" oninput="applyStyle('backgroundColor',this.value)"></div>
+          <button class="act-btn" style="flex:0;padding:5px 10px;font-size:11px" onclick="applyStyle('backgroundColor','transparent')">✕ Clear</button>
+        </div>
+      </div>`;
+
+    if (tag === "a") {
+      html += `
+        <div class="prop-group">
+          <div class="prop-label">Link URL</div>
+          <input class="prop-input" type="text" value="${el.href||""}" oninput="applyAttr('href',this.value)" placeholder="https://…">
+        </div>`;
+    }
+  } else {
+    html += `
+      <div class="prop-group">
+        <div class="prop-label">Image URL</div>
+        <input class="prop-input" type="text" value="${el.src||""}" oninput="applyAttr('src',this.value)" placeholder="https://…">
+      </div>
+      <div class="prop-group">
+        <div class="prop-label">Upload Image</div>
+        <input type="file" id="pe-upload" accept="image/*" style="display:none" onchange="uploadImage(event)">
+        <button class="act-btn success" onclick="document.getElementById('pe-upload').click()">📁 Choose File…</button>
+      </div>
+      <div class="prop-group">
+        <div class="prop-label">Alt Text</div>
+        <input class="prop-input" type="text" value="${el.alt||""}" oninput="applyAttr('alt',this.value)" placeholder="Describe image…">
+      </div>
+      <div class="prop-group">
+        <div class="prop-label">Width</div>
+        <input class="prop-input" type="text" value="${el.style.width||""}" oninput="applyStyle('width',this.value)" placeholder="auto / 100% / 300px">
+      </div>`;
+  }
+
+  html += `
+    <div class="divider-label">Padding</div>
+    <div class="spacing-grid">
+      <div class="spacing-cell"><span class="spacing-label">Top</span><input class="spacing-input" type="number" value="${ptop}" oninput="applyStyle('paddingTop',this.value+'px')"></div>
+      <div class="spacing-cell"><span class="spacing-label">Bottom</span><input class="spacing-input" type="number" value="${pbot}" oninput="applyStyle('paddingBottom',this.value+'px')"></div>
+      <div class="spacing-cell"><span class="spacing-label">Left</span><input class="spacing-input" type="number" value="${pleft}" oninput="applyStyle('paddingLeft',this.value+'px')"></div>
+      <div class="spacing-cell"><span class="spacing-label">Right</span><input class="spacing-input" type="number" value="${prght}" oninput="applyStyle('paddingRight',this.value+'px')"></div>
+    </div>
+    <div class="divider-label">Margin</div>
+    <div class="spacing-grid">
+      <div class="spacing-cell"><span class="spacing-label">Top</span><input class="spacing-input" type="number" value="${mtop}" oninput="applyStyle('marginTop',this.value+'px')"></div>
+      <div class="spacing-cell"><span class="spacing-label">Bottom</span><input class="spacing-input" type="number" value="${mbot}" oninput="applyStyle('marginBottom',this.value+'px')"></div>
+      <div class="spacing-cell"><span class="spacing-label">Left</span><input class="spacing-input" type="number" value="${mleft}" oninput="applyStyle('marginLeft',this.value+'px')"></div>
+      <div class="spacing-cell"><span class="spacing-label">Right</span><input class="spacing-input" type="number" value="${mrght}" oninput="applyStyle('marginRight',this.value+'px')"></div>
+    </div>
+    <div class="divider-label">Actions</div>
+    <div class="btn-row">
+      <button class="act-btn danger" onclick="deleteElement()">🗑 Delete</button>
+      <button class="act-btn" onclick="duplicateElement()">⧉ Duplicate</button>
+    </div>`;
+
+  document.getElementById("panel-edit").innerHTML = html;
+}
+
+/* ══════════════════════════════════════════════════════
+   APPLY CHANGES TO IFRAME ELEMENT
+══════════════════════════════════════════════════════ */
+function getSelected() { return S.selectedInfo ? S.selectedInfo.el : null; }
+
+function applyText(val) {
+  const el = getSelected(); if (!el) return;
+  snap(); el.innerText = val; markDirty();
+}
+
+function applyStyle(prop, val) {
+  const el = getSelected(); if (!el) return;
+  snap(); el.style[prop] = val; markDirty();
+}
+
+function applyAttr(attr, val) {
+  const el = getSelected(); if (!el) return;
+  snap(); el[attr] = val; markDirty();
+}
+
+function deleteElement() {
+  const el = getSelected(); if (!el || !confirm("Delete this element?")) return;
+  snap(); el.remove(); clearSelection(); markDirty(); toast("🗑 Deleted", "ok");
+}
+
+function duplicateElement() {
+  const el = getSelected(); if (!el) return;
+  snap();
+  const clone = el.cloneNode(true);
+  clone.classList.remove("__ed-selected");
+  el.parentNode.insertBefore(clone, el.nextSibling);
+  markDirty(); toast("⧉ Duplicated", "ok");
+}
+
+async function uploadImage(e) {
+  const file = e.target.files[0];
+  const el   = getSelected();
+  if (!file || !el) return;
+
+  const reader = new FileReader();
+  reader.onload = async ev => {
+    snap(); el.src = ev.target.result; markDirty();
+    try {
+      const fd = new FormData(); fd.append("image", file);
+      const res = await fetch(CFG.server + "/upload", {
+        method: "POST", body: fd,
+        headers: { "X-Auth": S.authHeader }
+      });
+      if (res.ok) {
+        const d = await res.json();
+        el.src = d.url;
+        buildEditPanel(el, "image", getWin().getComputedStyle(el));
+        toast("✅ Image uploaded", "ok");
+      }
+    } catch { toast("ℹ️ Image set as data URL preview", ""); }
+    markDirty();
+  };
+  reader.readAsDataURL(file);
+}
+
+/* ══════════════════════════════════════════════════════
+   SECTION MANAGEMENT
+══════════════════════════════════════════════════════ */
+function refreshSectionList() {
+  const doc = getDoc(); if (!doc) return;
+  const sections = Array.from(doc.querySelectorAll("section, header, footer, [class*='section'], body > div")).filter(el => {
+    return !el.closest("#__editor-styles") && el.getBoundingClientRect().height > 0;
+  });
+
+  const list = document.getElementById("section-list");
+  if (!sections.length) {
+    list.innerHTML = "<div class='empty-state'><span class='big'>📭</span>No sections found.</div>";
+    return;
+  }
+
+  list.innerHTML = sections.map((sec, i) => {
+    const name = sec.id || sec.className.split(" ").find(c => c) || sec.tagName.toLowerCase();
+    const label = name.length > 22 ? name.slice(0,22)+"…" : name;
+    return `<div class="sec-item">
+      <span class="sec-name">${label}</span>
+      <div class="sec-actions">
+        <button class="sec-btn up" onclick="moveSec(${i},-1)" title="Move Up">↑</button>
+        <button class="sec-btn dn" onclick="moveSec(${i},1)"  title="Move Down">↓</button>
+        <button class="sec-btn hide" onclick="hideSec(${i})" title="Hide/Show">👁</button>
+        <button class="sec-btn del" onclick="delSec(${i})"   title="Delete">✕</button>
+      </div>
+    </div>`;
+  }).join("");
+
+  window.__edSections = sections;
+}
+
+function moveSec(i, dir) {
+  const secs = window.__edSections; if (!secs) return;
+  const sec = secs[i];
+  snap();
+  if (dir === -1 && sec.previousElementSibling) {
+    sec.parentNode.insertBefore(sec, sec.previousElementSibling);
+  } else if (dir === 1 && sec.nextElementSibling) {
+    sec.parentNode.insertBefore(sec.nextElementSibling, sec);
+  }
+  markDirty(); refreshSectionList();
+}
+
+function hideSec(i) {
+  const secs = window.__edSections; if (!secs) return;
+  const sec = secs[i];
+  snap();
+  sec.style.display = sec.style.display === "none" ? "" : "none";
+  toast(sec.style.display === "none" ? "🙈 Section hidden" : "✅ Section shown", "ok");
+  markDirty(); refreshSectionList();
+}
+
+function delSec(i) {
+  const secs = window.__edSections; if (!secs) return;
+  if (!confirm("Delete this entire section?")) return;
+  snap(); secs[i].remove(); markDirty(); refreshSectionList();
+  toast("🗑 Section deleted", "ok");
+}
+
+/* ══════════════════════════════════════════════════════
+   ADD SECTION PRESETS
+══════════════════════════════════════════════════════ */
+const PRESETS = [
+  { icon:"🦸", label:"Hero",       key:"hero"    },
+  { icon:"📣", label:"CTA Banner", key:"cta"     },
+  { icon:"📝", label:"Text Block", key:"text"    },
+  { icon:"🃏", label:"3-Col Cards",key:"cards"   },
+  { icon:"👥", label:"Team",       key:"team"    },
+  { icon:"⭐", label:"Reviews",    key:"reviews" },
+  { icon:"❓", label:"FAQ",        key:"faq"     },
+  { icon:"📍", label:"Contact",    key:"contact" },
+];
+
+const SECTION_HTML = {
+  hero: `<section style="background:linear-gradient(135deg,#1e6b6b,#2a8080);padding:80px 0;text-align:center;"><div style="max-width:1100px;margin:0 auto;padding:0 24px;"><h1 style="color:#fff;font-size:48px;font-weight:700;margin-bottom:16px;">New Hero Section</h1><p style="color:rgba(255,255,255,0.8);font-size:18px;max-width:540px;margin:0 auto 28px;">Your supporting headline copy goes here.</p><a href="#" style="background:#fff;color:#1e6b6b;padding:14px 32px;border-radius:8px;font-weight:700;text-decoration:none;font-size:15px;">Get Started →</a></div></section>`,
+  cta: `<section style="background:#1c2b35;padding:60px 0;"><div style="max-width:1100px;margin:0 auto;padding:0 24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:24px;"><div><h2 style="color:#fff;font-size:36px;font-weight:700;margin-bottom:10px;">Take Action Today</h2><p style="color:#8faabb;font-size:16px;">Add your CTA description here.</p></div><a href="#" style="background:#1e6b6b;color:#fff;padding:14px 28px;border-radius:8px;font-weight:700;text-decoration:none;">Call Now →</a></div></section>`,
+  text: `<section style="padding:80px 0;background:#f8fafb;"><div style="max-width:800px;margin:0 auto;padding:0 24px;text-align:center;"><h2 style="color:#1c2b35;font-size:36px;font-weight:700;margin-bottom:16px;">Section Title</h2><p style="color:#6b7280;font-size:16px;line-height:1.7;">Add your body text here. Click to edit this text.</p></div></section>`,
+  cards: `<section style="padding:80px 0;"><div style="max-width:1100px;margin:0 auto;padding:0 24px;"><h2 style="text-align:center;color:#1c2b35;font-size:36px;font-weight:700;margin-bottom:40px;">Our Features</h2><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px;"><div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:28px;text-align:center;"><div style="font-size:36px;margin-bottom:12px;">🎯</div><h3 style="color:#1e6b6b;font-size:18px;font-weight:700;margin-bottom:8px;">Feature One</h3><p style="color:#6b7280;font-size:14px;line-height:1.6;">Describe this feature briefly.</p></div><div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:28px;text-align:center;"><div style="font-size:36px;margin-bottom:12px;">💡</div><h3 style="color:#1e6b6b;font-size:18px;font-weight:700;margin-bottom:8px;">Feature Two</h3><p style="color:#6b7280;font-size:14px;line-height:1.6;">Describe this feature briefly.</p></div><div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:28px;text-align:center;"><div style="font-size:36px;margin-bottom:12px;">🤝</div><h3 style="color:#1e6b6b;font-size:18px;font-weight:700;margin-bottom:8px;">Feature Three</h3><p style="color:#6b7280;font-size:14px;line-height:1.6;">Describe this feature briefly.</p></div></div></div></section>`,
+  team: `<section style="padding:80px 0;background:#f8fafb;"><div style="max-width:1100px;margin:0 auto;padding:0 24px;text-align:center;"><h2 style="color:#1c2b35;font-size:36px;font-weight:700;margin-bottom:40px;">Our Team</h2><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:24px;"><div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:28px;"><div style="width:80px;height:80px;border-radius:50%;background:#b8d4d4;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;font-size:36px;">👤</div><h3 style="color:#1c2b35;font-size:18px;font-weight:700;margin-bottom:4px;">Team Member</h3><div style="color:#1e6b6b;font-size:12px;font-weight:700;text-transform:uppercase;margin-bottom:10px;">Role Title</div><p style="color:#6b7280;font-size:14px;">Brief bio here.</p></div><div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:28px;"><div style="width:80px;height:80px;border-radius:50%;background:#b8d4d4;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;font-size:36px;">👤</div><h3 style="color:#1c2b35;font-size:18px;font-weight:700;margin-bottom:4px;">Team Member</h3><div style="color:#1e6b6b;font-size:12px;font-weight:700;text-transform:uppercase;margin-bottom:10px;">Role Title</div><p style="color:#6b7280;font-size:14px;">Brief bio here.</p></div></div></div></section>`,
+  reviews: `<section style="padding:80px 0;"><div style="max-width:1100px;margin:0 auto;padding:0 24px;text-align:center;"><h2 style="color:#1c2b35;font-size:36px;font-weight:700;margin-bottom:40px;">What Patients Say</h2><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;"><div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:28px;text-align:left;"><div style="color:#f5a623;font-size:18px;margin-bottom:12px;">★★★★★</div><p style="color:#2d3748;font-style:italic;margin-bottom:20px;">"Add a patient testimonial here."</p><div style="font-weight:700;font-size:14px;">John D.</div><div style="color:#6b7280;font-size:12px;">Verified Patient</div></div><div style="background:#1e6b6b;border-radius:12px;padding:28px;text-align:left;"><div style="color:#7dd4d4;font-size:18px;margin-bottom:12px;">★★★★★</div><p style="color:#fff;font-style:italic;margin-bottom:20px;">"This is the featured review."</p><div style="font-weight:700;font-size:14px;color:#fff;">Mary S.</div><div style="color:rgba(255,255,255,0.7);font-size:12px;">Northfield, MN</div></div><div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:28px;text-align:left;"><div style="color:#f5a623;font-size:18px;margin-bottom:12px;">★★★★★</div><p style="color:#2d3748;font-style:italic;margin-bottom:20px;">"Add another review here."</p><div style="font-weight:700;font-size:14px;">Robert T.</div><div style="color:#6b7280;font-size:12px;">Verified Patient</div></div></div></div></section>`,
+  faq: `<section style="padding:80px 0;background:#f8fafb;"><div style="max-width:780px;margin:0 auto;padding:0 24px;"><h2 style="color:#1c2b35;font-size:36px;font-weight:700;text-align:center;margin-bottom:40px;">Frequently Asked Questions</h2><div style="display:flex;flex-direction:column;gap:12px;"><div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:20px 24px;"><h3 style="color:#1c2b35;font-size:16px;font-weight:700;margin-bottom:8px;">Question goes here?</h3><p style="color:#6b7280;font-size:14px;line-height:1.6;">Answer goes here. Provide a clear, helpful response.</p></div><div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:20px 24px;"><h3 style="color:#1c2b35;font-size:16px;font-weight:700;margin-bottom:8px;">Another question?</h3><p style="color:#6b7280;font-size:14px;line-height:1.6;">Answer goes here. Provide a clear, helpful response.</p></div></div></div></section>`,
+  contact: `<section style="padding:80px 0;background:#1c2b35;"><div style="max-width:700px;margin:0 auto;padding:0 24px;text-align:center;"><h2 style="color:#fff;font-size:36px;font-weight:700;margin-bottom:12px;">Get In Touch</h2><p style="color:#8faabb;font-size:16px;margin-bottom:32px;">We'd love to hear from you.</p><div style="display:flex;flex-direction:column;gap:12px;text-align:left;"><input placeholder="Your Name" style="padding:14px 18px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.07);color:#fff;font-size:15px;outline:none;width:100%"><input placeholder="Email Address" style="padding:14px 18px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.07);color:#fff;font-size:15px;outline:none;width:100%"><textarea placeholder="Your message…" rows="4" style="padding:14px 18px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.07);color:#fff;font-size:15px;outline:none;width:100%;resize:vertical"></textarea><button style="padding:14px;background:#1e6b6b;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer">Send Message →</button></div></div></section>`,
+};
+
+function buildPresetGrid() {
+  document.getElementById("preset-grid").innerHTML = PRESETS.map(p =>
+    `<div class="preset-card" onclick="insertSection('${p.key}')">
+      <span class="preset-icon">${p.icon}</span>${p.label}
+    </div>`
+  ).join("");
+}
+
+function insertSection(key) {
+  const html = SECTION_HTML[key]; if (!html) return;
+  const doc  = getDoc(); if (!doc) return;
+  snap();
+  const div = doc.createElement("div");
+  div.innerHTML = html;
+  const sec = div.firstElementChild;
+  const footer = doc.querySelector("footer");
+  if (footer) footer.parentNode.insertBefore(sec, footer);
+  else doc.body.appendChild(sec);
+  sec.scrollIntoView({ behavior:"smooth", block:"center" });
+  markDirty(); toast("✅ Section added", "ok");
+  refreshSectionList();
+}
+
+/* ══════════════════════════════════════════════════════
+   UNDO / REDO
+══════════════════════════════════════════════════════ */
+function getFrameHTML() {
+  const doc = getDoc(); if (!doc) return "";
+  const clone = doc.documentElement.cloneNode(true);
+  const es = clone.querySelector("#__editor-styles");
+  if (es) es.remove();
+  clone.querySelectorAll(".__ed-hover,.__ed-selected").forEach(el => {
+    el.classList.remove("__ed-hover","__ed-selected");
+  });
+  return "<!DOCTYPE html>\n" + clone.outerHTML;
+}
+
+function snap() {
+  S.history = S.history.slice(0, S.histIdx + 1);
+  S.history.push(getFrameHTML());
+  if (S.history.length > 30) S.history.shift();
+  S.histIdx = S.history.length - 1;
+  updateUndoRedo();
+}
+
+function takeSnapshot() { snap(); }
+
+function doUndo() {
+  if (S.histIdx <= 0) return;
+  S.histIdx--;
+  restoreSnapshot(S.history[S.histIdx]);
+}
+
+function doRedo() {
+  if (S.histIdx >= S.history.length - 1) return;
+  S.histIdx++;
+  restoreSnapshot(S.history[S.histIdx]);
+}
+
+function restoreSnapshot(html) {
+  const doc = getDoc();
+  doc.open(); doc.write(html); doc.close();
+  if (S.editMode) setTimeout(injectHoverStyles, 100);
+  clearSelection();
+  updateUndoRedo();
+  markDirty();
+}
+
+function updateUndoRedo() {
+  document.getElementById("btn-undo").disabled = S.histIdx <= 0;
+  document.getElementById("btn-redo").disabled = S.histIdx >= S.history.length - 1;
+}
+
+/* ══════════════════════════════════════════════════════
+   SAVE
+══════════════════════════════════════════════════════ */
+async function saveChanges() {
+  setStatus("warn", "Saving…");
+
+  const doc = getDoc(); if (!doc) return;
+  const clone = doc.documentElement.cloneNode(true);
+  const es = clone.querySelector("#__editor-styles");
+  if (es) es.remove();
+  clone.querySelectorAll(".__ed-hover,.__ed-selected").forEach(el => {
+    el.classList.remove("__ed-hover","__ed-selected");
+  });
+  const html = "<!DOCTYPE html>\n" + clone.outerHTML;
+
+  try {
+    const res = await fetch(CFG.server + "/save", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Auth": S.authHeader
+      },
+      body: JSON.stringify({ html }),
+    });
+    if (res.ok) {
+      S.dirty = false;
+      setStatus("ok", "Saved ✓");
+      toast("💾 Saved to disk!", "ok");
+      clearTimeout(S.autosaveTimer);
+    } else {
+      throw new Error("Server returned " + res.status);
+    }
+  } catch (e) {
+    setStatus("off", "Save failed");
+    toast("❌ Save failed — is the server running? " + e.message, "err");
+  }
+}
+
+function markDirty() {
+  S.dirty = true;
+  setStatus("warn", "Unsaved changes");
+  clearTimeout(S.autosaveTimer);
+  S.autosaveTimer = setTimeout(saveChanges, CFG.autosaveDelay);
+}
+
+/* ══════════════════════════════════════════════════════
+   TAB SWITCHING
+══════════════════════════════════════════════════════ */
+function switchTab(name) {
+  S.currentTab = name;
+  ["edit","sections","add","images","seo"].forEach(t => {
+    document.getElementById("panel-" + t).style.display = t === name ? "block" : "none";
+    document.getElementById("tab-" + t).classList.toggle("active", t === name);
+  });
+  if (name === "sections") refreshSectionList();
+  if (name === "seo")      loadSEOFromFrame();
+  if (name === "images")   { populateSectionDropdown(); loadMediaGallery(); detectLogo(); }
+}
+
+/* ══════════════════════════════════════════════════════
+   LOGO MANAGEMENT
+══════════════════════════════════════════════════════ */
+function detectLogo() {
+  const doc = getDoc(); if (!doc) return;
+  const logoEl = doc.querySelector("header img, nav img, .logo img, .navbar img, img.logo, #site-logo, #logo img, .logo-img");
+  const prev = document.getElementById("logo-preview");
+  if (logoEl && logoEl.src) {
+    prev.innerHTML = `<img src="${logoEl.src}" style="max-width:100%;max-height:60px;object-fit:contain;border-radius:4px">`;
+    const w = parseInt(logoEl.style.width) || logoEl.naturalWidth || 160;
+    const clamped = Math.min(400, Math.max(40, w));
+    document.getElementById("logo-width-range").value = clamped;
+    document.getElementById("logo-width-val").textContent = clamped + "px";
+  } else {
+    prev.innerHTML = `<span style="color:var(--muted);font-size:12px">No logo detected in header/nav</span>`;
+  }
+}
+
+function handleLogoUpload(e) {
+  const file = e.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const doc = getDoc(); if (!doc) return;
+    snap();
+    let logoEl = doc.querySelector("header img, nav img, .logo img, .navbar img, img.logo, #site-logo");
+    if (!logoEl) {
+      const container = doc.querySelector("header, nav") || doc.body;
+      logoEl = doc.createElement("img");
+      logoEl.id = "site-logo";
+      logoEl.alt = "Site Logo";
+      logoEl.style.cssText = "display:block;width:160px;height:auto;";
+      container.insertBefore(logoEl, container.firstChild);
+    }
+    logoEl.src = ev.target.result;
+    const w = document.getElementById("logo-width-range").value;
+    logoEl.style.width  = w + "px";
+    logoEl.style.height = "auto";
+    document.getElementById("logo-preview").innerHTML =
+      `<img src="${ev.target.result}" style="max-width:100%;max-height:60px;object-fit:contain;border-radius:4px">`;
+    markDirty();
+    toast("✅ Logo updated", "ok");
+    tryServerUpload(file).then(url => { if (url) logoEl.src = url; });
+    e.target.value = "";
+  };
+  reader.readAsDataURL(file);
+}
+
+function applyLogoWidth(val) {
+  const doc = getDoc(); if (!doc) return;
+  const logoEl = doc.querySelector("#site-logo, header img, nav img, .logo img, img.logo");
+  if (logoEl) { logoEl.style.width = val + "px"; logoEl.style.height = "auto"; markDirty(); }
+}
+
+function removeLogo() {
+  const doc = getDoc(); if (!doc) return;
+  const logoEl = doc.querySelector("#site-logo, header img, nav img, .logo img, img.logo");
+  if (!logoEl) { toast("⚠️ No logo found", "err"); return; }
+  if (!confirm("Remove the logo from the page?")) return;
+  snap(); logoEl.remove();
+  document.getElementById("logo-preview").innerHTML = `<span style="color:var(--muted);font-size:12px">Logo removed</span>`;
+  markDirty(); toast("🗑 Logo removed", "ok");
+}
+
+/* ══════════════════════════════════════════════════════
+   SECTION IMAGE UPLOAD
+══════════════════════════════════════════════════════ */
+function populateSectionDropdown() {
+  const doc = getDoc(); if (!doc) return;
+  const sections = Array.from(doc.querySelectorAll("section, header, footer, body > div")).filter(el =>
+    el.getBoundingClientRect().height > 0
+  );
+  const sel = document.getElementById("img-target-section");
+  sel.innerHTML = '<option value="">— pick a section —</option>';
+  sections.forEach((sec, i) => {
+    const name  = sec.id || sec.className.split(" ")[0] || sec.tagName.toLowerCase();
+    const label = name.length > 26 ? name.slice(0,26)+"…" : name;
+    const opt   = document.createElement("option");
+    opt.value   = i;
+    opt.textContent = `${i + 1}. ${label}`;
+    sel.appendChild(opt);
+  });
+  window.__mediaSections = sections;
+}
+
+function triggerSectionImageUpload() {
+  const sel = document.getElementById("img-target-section").value;
+  if (sel === "") { toast("⚠️ Pick a target section first", "err"); return; }
+  document.getElementById("img-section-upload").click();
+}
+
+function handleSectionImageUpload(e) {
+  const file   = e.target.files[0]; if (!file) return;
+  const secIdx = document.getElementById("img-target-section").value;
+  const pos    = document.getElementById("img-position").value;
+  const width  = document.getElementById("img-insert-width").value || "100%";
+  const secs   = window.__mediaSections;
+  if (!secs || secIdx === "") { toast("⚠️ No section selected", "err"); return; }
+
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const doc = getDoc(); if (!doc) return;
+    snap();
+    const img = doc.createElement("img");
+    img.src = ev.target.result;
+    img.alt = file.name.replace(/\.[^.]+$/, "");
+    img.style.cssText = `width:${width};height:auto;display:block;`;
+    const target = secs[parseInt(secIdx)];
+    if (pos === "prepend") target.insertBefore(img, target.firstChild);
+    else                   target.appendChild(img);
+    target.scrollIntoView({ behavior:"smooth", block:"center" });
+    markDirty(); toast("✅ Image inserted into section", "ok");
+    tryServerUpload(file).then(url => {
+      if (url) { img.src = url; loadMediaGallery(); }
+    });
+    e.target.value = "";
+  };
+  reader.readAsDataURL(file);
+}
+
+async function tryServerUpload(file) {
+  try {
+    const fd = new FormData();
+    fd.append("image", file);
+    const res = await fetch(CFG.server + "/upload", {
+      method: "POST", body: fd,
+      headers: { "X-Auth": S.authHeader }
+    });
+    if (res.ok) { const d = await res.json(); return d.url; }
+  } catch {}
+  return null;
+}
+
+async function loadMediaGallery() {
+  const gallery = document.getElementById("media-gallery");
+  gallery.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:12px;color:var(--muted);font-size:12px">Loading…</div>`;
+  try {
+    const res = await fetch(CFG.server + "/images", { headers: { "X-Auth": S.authHeader } });
+    if (!res.ok) throw new Error("no endpoint");
+    const data = await res.json();
+    const imgs = data.images || [];
+    if (!imgs.length) {
+      gallery.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:16px;color:var(--muted);font-size:12px">No uploaded images yet.</div>`;
+      return;
+    }
+    gallery.innerHTML = imgs.map(url => `
+      <div class="media-thumb" title="Click to copy URL" onclick="copyToClipboard('${url}')">
+        <img src="${url}" alt="">
+        <div class="media-thumb-name">${url.split("/").pop()}</div>
+      </div>`).join("");
+  } catch {
+    gallery.innerHTML = `<div style="grid-column:1/-1;color:var(--muted);font-size:12px;padding:16px;text-align:center">Gallery unavailable — server may not expose /images endpoint.</div>`;
+  }
+}
+
+function copyToClipboard(text) {
+  navigator.clipboard.writeText(text).then(() => toast("📋 URL copied!", "ok")).catch(() => toast("❌ Copy failed", "err"));
+}
+
+/* ══════════════════════════════════════════════════════
+   SEO MANAGEMENT (Quick Edit panel)
+══════════════════════════════════════════════════════ */
+function getMeta(doc, name, isProp) {
+  const attr = isProp ? "property" : "name";
+  const el   = doc.querySelector(`meta[${attr}="${name}"]`);
+  return el ? (el.getAttribute("content") || "") : "";
+}
+
+function loadSEOFromFrame() {
+  const doc = getDoc(); if (!doc) return;
+
+  document.getElementById("seo-title").value         = doc.title || "";
+  document.getElementById("seo-desc").value          = getMeta(doc, "description");
+  document.getElementById("seo-keywords").value      = getMeta(doc, "keywords");
+  document.getElementById("seo-og-title").value      = getMeta(doc, "og:title", true);
+  document.getElementById("seo-og-desc").value       = getMeta(doc, "og:description", true);
+  document.getElementById("seo-og-image").value      = getMeta(doc, "og:image", true);
+  document.getElementById("seo-twitter-card").value  = getMeta(doc, "twitter:card") || "summary_large_image";
+
+  const robotsVal = getMeta(doc, "robots");
+  const robotsSel = document.getElementById("seo-robots");
+  if (robotsVal) {
+    let found = false;
+    for (const opt of robotsSel.options) { if (opt.value === robotsVal) { robotsSel.value = robotsVal; found = true; break; } }
+    if (!found) robotsSel.selectedIndex = 0;
+  }
+
+  const canonical = doc.querySelector("link[rel='canonical']");
+  document.getElementById("seo-canonical").value = canonical ? canonical.getAttribute("href") || "" : "";
+
+  const schema = doc.querySelector("script[type='application/ld+json']");
+  if (schema) {
+    try {
+      const data = JSON.parse(schema.textContent);
+      if (data["@type"]) document.getElementById("seo-schema-type").value = data["@type"];
+      if (data.name)      document.getElementById("seo-biz-name").value    = data.name;
+      if (data.telephone) document.getElementById("seo-biz-phone").value   = data.telephone;
+      if (data.address)   document.getElementById("seo-biz-address").value = typeof data.address === "string" ? data.address : data.address.streetAddress || "";
+      if (data.url)       document.getElementById("seo-biz-url").value     = data.url;
+    } catch {}
+  }
+
+  toggleSchemaFields();
+  updateSEOCounters();
+  updateSEOPreview();
+}
+
+function updateSEOCounters() {
+  const titleLen = (document.getElementById("seo-title").value || "").length;
+  const descLen  = (document.getElementById("seo-desc").value  || "").length;
+
+  const tc = document.getElementById("seo-title-counter");
+  tc.textContent = `${titleLen} / 60`;
+  tc.className = "char-counter" + (titleLen > 60 ? " over" : titleLen > 50 ? " warn" : "");
+
+  const dc = document.getElementById("seo-desc-counter");
+  dc.textContent = `${descLen} / 160`;
+  dc.className = "char-counter" + (descLen > 160 ? " over" : descLen > 140 ? " warn" : "");
+}
+
+function updateSEOPreview() {
+  const title = (document.getElementById("seo-title").value    || "Page Title").slice(0, 60);
+  const desc  = (document.getElementById("seo-desc").value     || "Meta description will appear here…").slice(0, 160);
+  const url   = document.getElementById("seo-canonical").value || window.location.origin;
+  document.getElementById("seo-preview-title").textContent = title;
+  document.getElementById("seo-preview-desc").textContent  = desc;
+  document.getElementById("seo-preview-url").textContent   = url;
+}
+
+function toggleSchemaFields() {
+  const val = document.getElementById("seo-schema-type").value;
+  document.getElementById("seo-schema-fields").style.display = val ? "block" : "none";
+}
+
+async function handleOGImageUpload(e) {
+  const file = e.target.files[0]; if (!file) return;
+  toast("⏳ Uploading OG image…", "");
+  const url = await tryServerUpload(file);
+  if (url) {
+    document.getElementById("seo-og-image").value = url;
+    toast("✅ OG image uploaded", "ok");
+  } else {
+    toast("ℹ️ Server upload unavailable — use a hosted image URL", "");
+  }
+  e.target.value = "";
+}
+
+function setOrCreateMeta(doc, attrName, attrVal, contentVal) {
+  if (!contentVal) return;
+  let el = doc.querySelector(`meta[${attrName}="${attrVal}"]`);
+  if (!el) {
+    el = doc.createElement("meta");
+    el.setAttribute(attrName, attrVal);
+    doc.head.appendChild(el);
+  }
+  el.setAttribute("content", contentVal);
+}
+
+function saveSEO() {
+  const doc = getDoc(); if (!doc) return;
+  snap();
+
+  const titleVal = document.getElementById("seo-title").value.trim();
+  if (titleVal) doc.title = titleVal;
+
+  setOrCreateMeta(doc, "name", "description",   document.getElementById("seo-desc").value.trim());
+  setOrCreateMeta(doc, "name", "keywords",       document.getElementById("seo-keywords").value.trim());
+  setOrCreateMeta(doc, "name", "robots",         document.getElementById("seo-robots").value);
+  setOrCreateMeta(doc, "property", "og:title",       document.getElementById("seo-og-title").value.trim());
+  setOrCreateMeta(doc, "property", "og:description",  document.getElementById("seo-og-desc").value.trim());
+  setOrCreateMeta(doc, "property", "og:image",        document.getElementById("seo-og-image").value.trim());
+  setOrCreateMeta(doc, "property", "og:type",         "website");
+  setOrCreateMeta(doc, "name", "twitter:card",   document.getElementById("seo-twitter-card").value);
+
+  const canonVal = document.getElementById("seo-canonical").value.trim();
+  if (canonVal) {
+    let link = doc.querySelector("link[rel='canonical']");
+    if (!link) { link = doc.createElement("link"); link.rel = "canonical"; doc.head.appendChild(link); }
+    link.setAttribute("href", canonVal);
+  }
+
+  const schemaType = document.getElementById("seo-schema-type").value;
+  if (schemaType) {
+    let schemaEl = doc.querySelector("script[type='application/ld+json']");
+    if (!schemaEl) { schemaEl = doc.createElement("script"); schemaEl.type = "application/ld+json"; doc.head.appendChild(schemaEl); }
+    const schema = { "@context": "https://schema.org", "@type": schemaType };
+    const bizName    = document.getElementById("seo-biz-name").value.trim();
+    const bizPhone   = document.getElementById("seo-biz-phone").value.trim();
+    const bizAddress = document.getElementById("seo-biz-address").value.trim();
+    const bizUrl     = document.getElementById("seo-biz-url").value.trim();
+    if (bizName)    schema.name      = bizName;
+    if (bizPhone)   schema.telephone = bizPhone;
+    if (bizAddress) schema.address   = { "@type": "PostalAddress", "streetAddress": bizAddress };
+    if (bizUrl)     schema.url       = bizUrl;
+    schemaEl.textContent = JSON.stringify(schema, null, 2);
+  }
+
+  markDirty();
+  toast("🔍 SEO applied — hit 💾 Save to persist", "ok");
+}
+
+/* ══════════════════════════════════════════════════════
+   SEO EDITOR — popup bridge
+══════════════════════════════════════════════════════ */
+function openSEOEditor() {
+  const win = window.open(
+    "seo.html",
+    "seo_editor",
+    "width=1280,height=820,resizable=yes,scrollbars=yes"
+  );
+  if (!win) {
+    toast("⚠️ Pop-up blocked — allow pop-ups for this site", "err");
+    return;
+  }
+
+  // Expose getDoc so seo.html can read existing meta tags from the iframe
+  window.getDoc = getDoc;
+
+  // Expose seoEditorApply so seo.html's "Apply & Save" writes back to the iframe
+  window.seoEditorApply = async function(data) {
+    const doc = getDoc();
+    if (!doc) { toast("❌ No page loaded in iframe", "err"); return; }
+    snap(); // add to undo history before mutating
+
+    // Helper: upsert a <meta> tag in doc.head
+    function setMeta(name, val, isProp) {
+      if (!val) return;
+      const attr = isProp ? "property" : "name";
+      let el = doc.querySelector(`meta[${attr}="${name}"]`);
+      if (!el) {
+        el = doc.createElement("meta");
+        el.setAttribute(attr, name);
+        doc.head.appendChild(el);
+      }
+      el.setAttribute("content", val);
+    }
+
+    // Helper: upsert a <link> tag
+    function setLink(rel, href) {
+      if (!href) return;
+      let el = doc.querySelector(`link[rel='${rel}']`);
+      if (!el) {
+        el = doc.createElement("link");
+        el.rel = rel;
+        doc.head.appendChild(el);
+      }
+      el.setAttribute("href", href);
+    }
+
+    // ── Basic SEO ──
+    if (data.title) doc.title = data.title;
+    setMeta("description", data.desc);
+    setMeta("keywords",    data.metaKeywords);
+    setMeta("robots",      data.robots);
+
+    // ── Open Graph ──
+    if (data.og) {
+      setMeta("og:title",       data.og.title,             true);
+      setMeta("og:description", data.og.desc,              true);
+      setMeta("og:image",       data.og.image,             true);
+      setMeta("og:type",        data.og.type || "website", true);
+      setMeta("og:locale",      data.og.locale,            true);
+    }
+
+    // ── Twitter Card ──
+    if (data.twitter) {
+      setMeta("twitter:card",        data.twitter.card);
+      setMeta("twitter:title",       data.twitter.title);
+      setMeta("twitter:description", data.twitter.desc);
+      setMeta("twitter:image",       data.twitter.image);
+      setMeta("twitter:site",        data.twitter.site);
+      setMeta("twitter:creator",     data.twitter.creator);
+    }
+
+    // ── Canonical ──
+    setLink("canonical", data.canonical);
+
+    // ── Technical meta ──
+    if (data.technical) {
+      setMeta("theme-color",              data.technical.themeColor);
+      setMeta("referrer",                 data.technical.referrer);
+      setMeta("google-site-verification", data.technical.gscVerify);
+      setMeta("msvalidate.01",            data.technical.bingVerify);
+
+      // Inject GA4 snippet if an ID is provided and not already present
+      if (data.technical.gaId && !doc.querySelector('script[src*="googletagmanager"]')) {
+        const s1 = doc.createElement("script");
+        s1.async = true;
+        s1.src = `https://www.googletagmanager.com/gtag/js?id=${data.technical.gaId}`;
+        doc.head.appendChild(s1);
+        const s2 = doc.createElement("script");
+        s2.textContent = [
+          "window.dataLayer=window.dataLayer||[];",
+          "function gtag(){dataLayer.push(arguments);}",
+          "gtag('js',new Date());",
+          `gtag('config','${data.technical.gaId}');`
+        ].join("");
+        doc.head.appendChild(s2);
+      }
+    }
+
+    // ── Schema JSON-LD ──
+    if (data.schemaJSON && data.schemaJSON.trim().startsWith("{")) {
+      let el = doc.querySelector("script[type='application/ld+json']");
+      if (!el) {
+        el = doc.createElement("script");
+        el.type = "application/ld+json";
+        doc.head.appendChild(el);
+      }
+      el.textContent = data.schemaJSON;
+    }
+
+    markDirty();
+    toast("🔍 SEO data applied from SEO Editor", "ok");
+    await saveChanges();
+
+    // Also refresh the quick-edit panel if it's active
+    if (S.currentTab === "seo") loadSEOFromFrame();
+  };
+
+  toast("🔍 SEO Editor opened", "ok");
+}
+
+/* ══════════════════════════════════════════════════════
+   UI HELPERS
+══════════════════════════════════════════════════════ */
+function setStatus(state, text) {
+  const dot = document.getElementById("status-dot");
+  dot.className = "status-dot";
+  if (state === "warn") dot.classList.add("warn");
+  if (state === "off")  dot.classList.add("off");
+  document.getElementById("status-text").textContent = text;
+}
+
+function toast(msg, type) {
+  const wrap = document.getElementById("toast-wrap");
+  const t = document.createElement("div");
+  t.className = "toast " + (type||"");
+  t.textContent = msg;
+  wrap.appendChild(t);
+  setTimeout(() => {
+    t.style.opacity = "0";
+    t.style.transition = "opacity 0.3s";
+    setTimeout(() => t.remove(), 300);
+  }, 3500);
+}
+
+function doLogout() {
+  if (S.dirty && !confirm("You have unsaved changes. Logout anyway?")) return;
+  window.location.href = "/";
+}
+
+function rgbToHex(rgb) {
+  const m = (rgb||"").match(/\d+/g);
+  if (!m || m.length < 3) return "#000000";
+  return "#" + [m[0],m[1],m[2]].map(n => parseInt(n).toString(16).padStart(2,"0")).join("");
+}
+
+// Keyboard shortcuts
+document.addEventListener("keydown", e => {
+  if (e.ctrlKey && e.key === "z") { e.preventDefault(); doUndo(); }
+  if (e.ctrlKey && (e.key === "y" || (e.shiftKey && e.key === "z"))) { e.preventDefault(); doRedo(); }
+  if (e.ctrlKey && e.key === "s") { e.preventDefault(); saveChanges(); }
+  if (e.key === "Escape") clearSelection();
+});
+</script>
+</body>
+</html>

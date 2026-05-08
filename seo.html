@@ -1,0 +1,1459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SEO Editor — Hearing Aid Doctor</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --bg:#0a0a12;
+  --surface:#13131e;
+  --surface2:#1a1a28;
+  --surface3:#22223a;
+  --border:rgba(255,255,255,0.07);
+  --border2:rgba(255,255,255,0.12);
+  --accent:#6c5ce7;
+  --accent2:#a29bfe;
+  --accent3:#74b9ff;
+  --success:#00b894;
+  --warn:#fdcb6e;
+  --danger:#e17055;
+  --text:#eaeaf4;
+  --muted:#6b6b8a;
+  --muted2:#9999b8;
+  --sidebar:260px;
+  --topbar:56px;
+  --font:'DM Sans',system-ui,sans-serif;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=DM+Mono:wght@400;500&display=swap');
+
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--font);font-size:14px;line-height:1.5}
+
+/* ── TOPBAR ── */
+#topbar{
+  height:var(--topbar);display:flex;align-items:center;
+  padding:0 20px;gap:12px;
+  background:var(--surface);border-bottom:1px solid var(--border);
+  position:relative;z-index:50;flex-shrink:0;
+}
+.tb-logo{display:flex;align-items:center;gap:10px;font-size:15px;font-weight:600;color:#fff}
+.tb-logo-icon{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:16px}
+.tb-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;background:rgba(108,92,231,0.2);border:1px solid rgba(108,92,231,0.35);color:var(--accent2);text-transform:uppercase;letter-spacing:0.8px}
+.tb-spacer{flex:1}
+.tb-btn{display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;border:1px solid var(--border2);background:rgba(255,255,255,0.04);color:var(--text);font-size:12.5px;font-weight:500;cursor:pointer;transition:all .15s;white-space:nowrap;font-family:var(--font)}
+.tb-btn:hover{background:rgba(255,255,255,0.09);border-color:rgba(108,92,231,0.4)}
+.tb-btn.primary{background:linear-gradient(135deg,var(--accent),#8e7bff);border-color:transparent;color:#fff;box-shadow:0 4px 16px rgba(108,92,231,0.3)}
+.tb-btn.primary:hover{opacity:.9}
+.tb-btn.back{border-color:rgba(255,255,255,0.1);color:var(--muted2)}
+.tb-btn.back:hover{color:var(--text)}
+.save-indicator{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:5px}
+.save-dot{width:6px;height:6px;border-radius:50%;background:var(--success)}
+.save-dot.dirty{background:var(--warn);animation:pulse .9s infinite}
+@keyframes pulse{50%{opacity:.3}}
+
+/* ── LAYOUT ── */
+#shell{display:flex;height:calc(100% - var(--topbar));overflow:hidden}
+
+/* ── SIDEBAR NAV ── */
+#sidebar{
+  width:var(--sidebar);flex-shrink:0;
+  background:var(--surface);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;overflow:hidden;
+}
+.nav-section-label{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);padding:18px 16px 6px}
+.nav-item{
+  display:flex;align-items:center;gap:10px;
+  padding:9px 16px;cursor:pointer;
+  font-size:13px;font-weight:500;color:var(--muted2);
+  border-left:2px solid transparent;
+  transition:all .12s;margin:1px 0;
+}
+.nav-item:hover{background:rgba(255,255,255,0.04);color:var(--text)}
+.nav-item.active{background:rgba(108,92,231,0.1);border-left-color:var(--accent);color:var(--accent2)}
+.nav-item .nav-icon{font-size:16px;flex-shrink:0;width:18px;text-align:center}
+.nav-item .nav-badge{margin-left:auto;font-size:9px;font-weight:700;padding:1px 6px;border-radius:10px;background:rgba(108,92,231,0.25);color:var(--accent2)}
+.nav-item .nav-badge.ok{background:rgba(0,184,148,0.2);color:var(--success)}
+.nav-item .nav-badge.warn{background:rgba(253,203,110,0.2);color:var(--warn)}
+.nav-score-card{margin:12px;padding:14px;background:var(--surface2);border:1px solid var(--border);border-radius:12px}
+.nav-score-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:8px}
+.score-ring-wrap{display:flex;align-items:center;gap:12px}
+.score-ring{position:relative;width:52px;height:52px;flex-shrink:0}
+.score-ring svg{transform:rotate(-90deg)}
+.score-ring .score-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:var(--text)}
+.score-details{flex:1}
+.score-line{display:flex;align-items:center;justify-content:space-between;font-size:11px;margin-bottom:3px}
+.score-line .sl-label{color:var(--muted)}
+.score-line .sl-val{font-weight:600}
+.score-line .sl-val.ok{color:var(--success)}
+.score-line .sl-val.warn{color:var(--warn)}
+.score-line .sl-val.bad{color:var(--danger)}
+
+/* ── MAIN CONTENT ── */
+#main{flex:1;overflow:hidden;display:flex;flex-direction:column}
+.section-panel{display:none;height:100%;overflow-y:auto;padding:28px 32px}
+.section-panel.active{display:block}
+.section-panel::-webkit-scrollbar{width:4px}
+.section-panel::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+/* ── PANEL HEADER ── */
+.panel-hdr{margin-bottom:28px}
+.panel-hdr h1{font-size:22px;font-weight:700;color:#fff;margin-bottom:4px}
+.panel-hdr p{font-size:13px;color:var(--muted2)}
+
+/* ── CARDS ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:22px;margin-bottom:18px}
+.card-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.9px;color:var(--muted);margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.card-title .ct-icon{font-size:14px}
+.card-title .ct-help{margin-left:auto;font-size:11px;font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted);cursor:help;text-decoration:underline dotted}
+
+/* ── FORM ELEMENTS ── */
+.field{margin-bottom:14px}
+.field:last-child{margin-bottom:0}
+.label{font-size:11px;font-weight:600;color:var(--muted2);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between}
+.label .hint{font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted);font-size:10.5px}
+.inp{
+  width:100%;padding:9px 12px;
+  background:rgba(255,255,255,0.04);
+  border:1px solid var(--border2);border-radius:8px;
+  color:var(--text);font-size:13px;outline:none;
+  transition:border-color .2s,box-shadow .2s;
+  font-family:var(--font);
+}
+.inp:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(108,92,231,0.15)}
+.inp.mono{font-family:'DM Mono',monospace;font-size:12px}
+textarea.inp{resize:vertical;min-height:72px;line-height:1.5}
+select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24'%3E%3Cpath fill='%236b6b8a' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:30px;cursor:pointer}
+.inp-group{display:flex;gap:8px}
+.inp-group .inp{flex:1}
+.inp-prefix{display:flex;align-items:center;padding:9px 12px;background:rgba(255,255,255,0.03);border:1px solid var(--border2);border-right:none;border-radius:8px 0 0 8px;color:var(--muted);font-size:12px;font-family:'DM Mono',monospace;white-space:nowrap}
+.inp-prefix+.inp{border-radius:0 8px 8px 0}
+
+/* char counter */
+.char-bar-wrap{margin-top:5px;display:flex;align-items:center;gap:8px}
+.char-bar{height:3px;border-radius:2px;background:var(--surface3);flex:1;overflow:hidden}
+.char-bar-fill{height:100%;border-radius:2px;background:var(--success);transition:width .2s,background .2s}
+.char-count{font-size:10px;color:var(--muted);white-space:nowrap;font-family:'DM Mono',monospace;min-width:44px;text-align:right}
+.char-count.warn{color:var(--warn)}
+.char-count.over{color:var(--danger)}
+
+/* ── TWO-COL GRID ── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media(max-width:900px){.two-col{grid-template-columns:1fr}}
+
+/* ── TOGGLE SWITCH ── */
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0}
+.toggle-row .tr-label{font-size:13px;color:var(--text)}
+.toggle-row .tr-sub{font-size:11px;color:var(--muted);margin-top:1px}
+.toggle{position:relative;width:38px;height:22px;flex-shrink:0}
+.toggle input{opacity:0;width:0;height:0;position:absolute}
+.toggle-slider{position:absolute;inset:0;background:var(--surface3);border-radius:11px;cursor:pointer;transition:.2s;border:1px solid var(--border2)}
+.toggle-slider::after{content:'';position:absolute;width:16px;height:16px;border-radius:50%;background:#fff;top:2px;left:2px;transition:.2s}
+.toggle input:checked+.toggle-slider{background:var(--accent);border-color:var(--accent)}
+.toggle input:checked+.toggle-slider::after{transform:translateX(16px)}
+
+/* ── GOOGLE PREVIEW ── */
+.google-preview{
+  background:rgba(255,255,255,0.03);
+  border:1px solid var(--border);border-radius:12px;padding:18px;
+  font-family:'DM Sans',sans-serif;
+}
+.gp-url{font-size:12px;color:#5f9e7d;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gp-title{font-size:18px;color:#8ab7fd;font-weight:600;margin-bottom:5px;line-height:1.3;cursor:pointer}
+.gp-title:hover{text-decoration:underline}
+.gp-desc{font-size:13px;color:#bdc1c6;line-height:1.6;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.gp-mobile-wrap{margin-top:14px;padding-top:14px;border-top:1px solid var(--border)}
+.gp-mobile-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:10px}
+.gp-mobile{background:#1a1a2a;border:1px solid var(--border2);border-radius:10px;padding:12px;max-width:360px}
+.gp-m-url{font-size:10px;color:#5f9e7d;margin-bottom:3px}
+.gp-m-title{font-size:15px;color:#8ab7fd;font-weight:600;margin-bottom:4px;line-height:1.3}
+.gp-m-desc{font-size:11px;color:#9e9ebc;line-height:1.5}
+
+/* ── SOCIAL CARD PREVIEW ── */
+.social-preview{border-radius:12px;overflow:hidden;border:1px solid var(--border2);max-width:520px}
+.sp-img{height:160px;background:linear-gradient(135deg,var(--surface3),var(--surface2));display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:12px;overflow:hidden;position:relative}
+.sp-img img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0}
+.sp-img .sp-placeholder{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:6px}
+.sp-info{background:var(--surface2);padding:14px 16px}
+.sp-domain{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.sp-title{font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px;line-height:1.3}
+.sp-desc{font-size:12px;color:var(--muted2);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+
+/* ── SCHEMA BUILDER ── */
+.schema-type-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;margin-bottom:16px}
+.schema-type-card{padding:12px 8px;border-radius:10px;border:1px solid var(--border);background:rgba(255,255,255,0.02);text-align:center;cursor:pointer;transition:all .15s}
+.schema-type-card:hover{border-color:rgba(108,92,231,0.4);background:rgba(108,92,231,0.06)}
+.schema-type-card.active{border-color:var(--accent);background:rgba(108,92,231,0.12)}
+.schema-type-card .stc-icon{font-size:20px;display:block;margin-bottom:6px}
+.schema-type-card .stc-name{font-size:11px;font-weight:600;color:var(--text)}
+.schema-preview{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:14px;font-family:'DM Mono',monospace;font-size:11px;color:#a8d8a8;line-height:1.6;max-height:200px;overflow-y:auto;white-space:pre-wrap;word-break:break-all}
+
+/* ── KEYWORDS TAG INPUT ── */
+.tags-wrap{display:flex;flex-wrap:wrap;gap:6px;padding:8px;background:rgba(255,255,255,0.03);border:1px solid var(--border2);border-radius:8px;min-height:44px;align-items:center;cursor:text;transition:border-color .2s}
+.tags-wrap:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px rgba(108,92,231,0.15)}
+.tag{display:flex;align-items:center;gap:5px;padding:3px 8px;border-radius:6px;background:rgba(108,92,231,0.2);border:1px solid rgba(108,92,231,0.3);color:var(--accent2);font-size:12px;font-weight:500}
+.tag button{background:none;border:none;color:var(--muted);cursor:pointer;padding:0;font-size:12px;line-height:1;display:flex;align-items:center}
+.tag button:hover{color:var(--danger)}
+.tag-inp{border:none;outline:none;background:transparent;color:var(--text);font-size:13px;font-family:var(--font);min-width:80px;flex:1}
+
+/* ── REDIRECTS TABLE ── */
+.redir-table{width:100%;border-collapse:collapse}
+.redir-table th{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);padding:8px 10px;text-align:left;border-bottom:1px solid var(--border)}
+.redir-table td{padding:8px 10px;border-bottom:1px solid var(--border);font-size:12px;color:var(--text)}
+.redir-table tr:last-child td{border-bottom:none}
+.redir-table td .inp{padding:5px 8px;font-size:12px}
+.del-btn{padding:5px 9px;border-radius:6px;border:1px solid rgba(225,112,85,.3);background:rgba(225,112,85,.1);color:var(--danger);font-size:11px;cursor:pointer;font-family:var(--font);font-weight:500}
+.del-btn:hover{background:rgba(225,112,85,.2)}
+.add-row-btn{display:flex;align-items:center;gap:6px;padding:8px 12px;border-radius:8px;border:1px dashed var(--border2);background:transparent;color:var(--muted2);font-size:12.5px;cursor:pointer;font-family:var(--font);font-weight:500;transition:all .15s;width:100%;justify-content:center;margin-top:10px}
+.add-row-btn:hover{border-color:var(--accent);color:var(--accent2);background:rgba(108,92,231,0.06)}
+
+/* ── CHECKLIST ── */
+.checklist{display:flex;flex-direction:column;gap:8px}
+.check-item{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-radius:8px;background:rgba(255,255,255,0.02);border:1px solid var(--border)}
+.check-item .ci-icon{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;margin-top:1px}
+.ci-icon.ok{background:rgba(0,184,148,.2);color:var(--success)}
+.ci-icon.warn{background:rgba(253,203,110,.2);color:var(--warn)}
+.ci-icon.bad{background:rgba(225,112,85,.2);color:var(--danger)}
+.ci-icon.info{background:rgba(116,185,255,.2);color:var(--accent3)}
+.check-item .ci-text{flex:1}
+.check-item .ci-title{font-size:12.5px;font-weight:600;color:var(--text);margin-bottom:2px}
+.check-item .ci-desc{font-size:11.5px;color:var(--muted2)}
+
+/* ── SITEMAP / ROBOTS ── */
+.code-preview{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:14px;font-family:'DM Mono',monospace;font-size:11.5px;color:#c8d6e5;line-height:1.7;overflow-x:auto;white-space:pre}
+.code-actions{display:flex;gap:8px;margin-top:10px}
+.code-btn{padding:7px 14px;border-radius:7px;border:1px solid var(--border2);background:rgba(255,255,255,0.04);color:var(--muted2);font-size:12px;font-weight:500;cursor:pointer;font-family:var(--font);transition:all .15s}
+.code-btn:hover{background:rgba(255,255,255,0.09);color:var(--text)}
+
+/* ── TABS inside main ── */
+.tab-bar{display:flex;gap:2px;padding:0 0 20px;border-bottom:1px solid var(--border);margin-bottom:24px}
+.tab-pill{padding:6px 14px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;color:var(--muted2);background:transparent;border:none;font-family:var(--font);transition:all .15s}
+.tab-pill.active{background:rgba(108,92,231,.15);color:var(--accent2)}
+.tab-pill:hover:not(.active){color:var(--text)}
+
+/* ── ACTION BAR (sticky bottom) ── */
+.action-bar{
+  position:sticky;bottom:0;left:0;right:0;
+  background:var(--surface);border-top:1px solid var(--border);
+  padding:12px 32px;display:flex;align-items:center;gap:12px;
+  z-index:20;
+}
+.action-bar .ab-info{font-size:12px;color:var(--muted);flex:1}
+.action-bar .ab-btn{padding:9px 20px;border-radius:9px;border:none;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font);transition:all .15s}
+.ab-btn.secondary{background:rgba(255,255,255,.06);color:var(--text);border:1px solid var(--border2)}
+.ab-btn.secondary:hover{background:rgba(255,255,255,.1)}
+.ab-btn.primary{background:linear-gradient(135deg,var(--accent),#8e7bff);color:#fff;box-shadow:0 4px 16px rgba(108,92,231,.3)}
+.ab-btn.primary:hover{opacity:.9}
+.ab-btn.success{background:linear-gradient(135deg,#00b894,#00cec9);color:#fff}
+
+/* ── TOAST ── */
+#toasts{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:1000;display:flex;flex-direction:column;gap:6px;align-items:center;pointer-events:none}
+.t-toast{background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:10px 18px;font-size:13px;font-weight:500;color:var(--text);box-shadow:0 8px 28px rgba(0,0,0,.5);animation:toastIn .3s ease;white-space:nowrap}
+.t-toast.ok{border-color:rgba(0,184,148,.4)}
+.t-toast.err{border-color:rgba(225,112,85,.4)}
+@keyframes toastIn{from{opacity:0;transform:translateY(8px)}}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div id="topbar">
+  <div class="tb-logo">
+    <div class="tb-logo-icon">🔍</div>
+    SEO Editor
+  </div>
+  <div class="tb-badge">Advanced</div>
+  <div class="tb-spacer"></div>
+  <div class="save-indicator">
+    <div class="save-dot" id="save-dot"></div>
+    <span id="save-label">All saved</span>
+  </div>
+  <button class="tb-btn" onclick="goBack()">← Back to Editor</button>
+  <button class="tb-btn primary" onclick="applyAndSave()">💾 Apply & Save</button>
+</div>
+
+<div id="shell">
+
+  <!-- SIDEBAR -->
+  <div id="sidebar">
+    <div class="nav-section-label">Optimization</div>
+    <div class="nav-item active" onclick="gotoSection('basic')" id="nav-basic">
+      <span class="nav-icon">📄</span> Basic SEO
+      <span class="nav-badge warn" id="badge-basic">!</span>
+    </div>
+    <div class="nav-item" onclick="gotoSection('social')" id="nav-social">
+      <span class="nav-icon">📲</span> Social Media
+      <span class="nav-badge" id="badge-social">OG</span>
+    </div>
+    <div class="nav-item" onclick="gotoSection('schema')" id="nav-schema">
+      <span class="nav-icon">🧩</span> Schema / JSON-LD
+      <span class="nav-badge ok" id="badge-schema">✓</span>
+    </div>
+    <div class="nav-item" onclick="gotoSection('technical')" id="nav-technical">
+      <span class="nav-icon">⚙️</span> Technical SEO
+    </div>
+    <div class="nav-item" onclick="gotoSection('sitemap')" id="nav-sitemap">
+      <span class="nav-icon">🗺</span> Sitemap & Robots
+    </div>
+    <div class="nav-item" onclick="gotoSection('redirects')" id="nav-redirects">
+      <span class="nav-icon">↪️</span> Redirects
+    </div>
+
+    <div class="nav-section-label">Analysis</div>
+    <div class="nav-item" onclick="gotoSection('audit')" id="nav-audit">
+      <span class="nav-icon">🔎</span> SEO Audit
+    </div>
+    <div class="nav-item" onclick="gotoSection('preview')" id="nav-preview">
+      <span class="nav-icon">👁</span> Previews
+    </div>
+
+    <!-- Score Card -->
+    <div style="flex:1"></div>
+    <div class="nav-score-card">
+      <div class="nav-score-title">SEO Score</div>
+      <div class="score-ring-wrap">
+        <div class="score-ring">
+          <svg width="52" height="52" viewBox="0 0 52 52">
+            <circle cx="26" cy="26" r="22" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="4"/>
+            <circle cx="26" cy="26" r="22" fill="none" stroke="var(--accent2)" stroke-width="4"
+              stroke-dasharray="138.2" stroke-dashoffset="55" stroke-linecap="round" id="score-circle"/>
+          </svg>
+          <div class="score-num" id="score-num">60</div>
+        </div>
+        <div class="score-details">
+          <div class="score-line"><span class="sl-label">Title</span><span class="sl-val" id="sc-title">–</span></div>
+          <div class="score-line"><span class="sl-label">Desc</span><span class="sl-val" id="sc-desc">–</span></div>
+          <div class="score-line"><span class="sl-label">Schema</span><span class="sl-val" id="sc-schema">–</span></div>
+          <div class="score-line"><span class="sl-label">OG</span><span class="sl-val" id="sc-og">–</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN PANELS -->
+  <div id="main">
+
+    <!-- ════ BASIC SEO ════ -->
+    <div class="section-panel active" id="panel-basic">
+      <div class="panel-hdr">
+        <h1>Basic SEO</h1>
+        <p>Page title, meta description, keywords & indexing directives</p>
+      </div>
+
+      <!-- Page Title -->
+      <div class="card">
+        <div class="card-title"><span class="ct-icon">📌</span> Page Title <span class="ct-help" title="Shown in browser tabs and search results. Keep under 60 characters.">60 char limit</span></div>
+        <div class="field">
+          <div class="label">Title Tag</div>
+          <input class="inp" type="text" id="seo-title" placeholder="The Hearing Aid Doctor — Expert Audiology Care"
+            oninput="charCount(this,'title-count',60);updateScore();updatePreviews()">
+          <div class="char-bar-wrap">
+            <div class="char-bar"><div class="char-bar-fill" id="title-bar" style="width:0%"></div></div>
+            <div class="char-count" id="title-count">0/60</div>
+          </div>
+        </div>
+        <div class="field">
+          <div class="label">Title Separator <span class="hint">Optional — pick how you separate brand from page name</span></div>
+          <div class="inp-group">
+            <select class="inp" id="title-sep" onchange="updatePreviews()" style="flex:0;width:auto">
+              <option value=" — ">— em dash</option>
+              <option value=" | ">| pipe</option>
+              <option value=" · ">· dot</option>
+              <option value=" - ">- hyphen</option>
+              <option value=" :: ">::</option>
+            </select>
+            <input class="inp" type="text" id="title-brand" placeholder="Your Brand Name" oninput="updatePreviews()">
+          </div>
+        </div>
+      </div>
+
+      <!-- Meta Description -->
+      <div class="card">
+        <div class="card-title"><span class="ct-icon">📝</span> Meta Description <span class="ct-help" title="Shown under the title in search results. Keep between 120–160 characters.">160 char limit</span></div>
+        <div class="field">
+          <textarea class="inp" id="seo-desc" rows="3" placeholder="Expert hearing aid fitting, audiological testing, and hearing loss solutions. Serving [City] for over 20 years."
+            oninput="charCount(this,'desc-count',160);updateScore();updatePreviews()"></textarea>
+          <div class="char-bar-wrap">
+            <div class="char-bar"><div class="char-bar-fill" id="desc-bar" style="width:0%"></div></div>
+            <div class="char-count" id="desc-count">0/160</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Keywords -->
+      <div class="card">
+        <div class="card-title"><span class="ct-icon">🏷</span> Focus Keywords</div>
+        <div class="field">
+          <div class="label">Primary Keyword</div>
+          <input class="inp" type="text" id="seo-primary-kw" placeholder="hearing aids [city]" oninput="updateScore()">
+        </div>
+        <div class="field">
+          <div class="label">Secondary Keywords <span class="hint">Type and press Enter</span></div>
+          <div class="tags-wrap" id="tags-wrap" onclick="document.getElementById('tag-inp').focus()">
+            <input class="tag-inp" id="tag-inp" placeholder="Add keyword…" onkeydown="handleTagKey(event)">
+          </div>
+          <input type="hidden" id="seo-keywords">
+        </div>
+        <div class="field">
+          <div class="label">Meta Keywords Tag <span class="hint">(legacy — most engines ignore this)</span></div>
+          <input class="inp" type="text" id="seo-meta-keywords" placeholder="hearing aids, audiologist, hearing loss treatment">
+        </div>
+      </div>
+
+      <!-- Indexing -->
+      <div class="card">
+        <div class="card-title"><span class="ct-icon">🤖</span> Crawling & Indexing</div>
+        <div class="field">
+          <div class="label">Robots Meta</div>
+          <select class="inp" id="seo-robots">
+            <option value="index, follow">index, follow — visible in search (recommended)</option>
+            <option value="noindex, follow">noindex, follow — hide from search, follow links</option>
+            <option value="index, nofollow">index, nofollow — visible, don't follow links</option>
+            <option value="noindex, nofollow">noindex, nofollow — fully block</option>
+          </select>
+        </div>
+        <div class="toggle-row">
+          <div>
+            <div class="tr-label">Google Bot allowed</div>
+            <div class="tr-sub">Allow Googlebot to crawl this page</div>
+          </div>
+          <label class="toggle"><input type="checkbox" id="tog-google" checked><span class="toggle-slider"></span></label>
+        </div>
+        <div class="toggle-row">
+          <div>
+            <div class="tr-label">Image indexing</div>
+            <div class="tr-sub">Allow images from this page to be indexed</div>
+          </div>
+          <label class="toggle"><input type="checkbox" id="tog-imgs" checked><span class="toggle-slider"></span></label>
+        </div>
+        <div class="toggle-row">
+          <div>
+            <div class="tr-label">Snippet previews</div>
+            <div class="tr-sub">Allow search engines to show snippet previews</div>
+          </div>
+          <label class="toggle"><input type="checkbox" id="tog-snippet" checked><span class="toggle-slider"></span></label>
+        </div>
+      </div>
+
+      <!-- Canonical -->
+      <div class="card">
+        <div class="card-title"><span class="ct-icon">🔗</span> URL & Canonical</div>
+        <div class="field">
+          <div class="label">Canonical URL</div>
+          <div class="inp-group">
+            <div class="inp-prefix">https://</div>
+            <input class="inp" type="text" id="seo-canonical" placeholder="yourdomain.com/page" oninput="updatePreviews()">
+          </div>
+        </div>
+        <div class="field">
+          <div class="label">Hreflang <span class="hint">For multilingual sites</span></div>
+          <select class="inp" id="seo-lang">
+            <option value="en">en — English</option>
+            <option value="en-US">en-US — English (United States)</option>
+            <option value="en-GB">en-GB — English (United Kingdom)</option>
+            <option value="es">es — Spanish</option>
+            <option value="fr">fr — French</option>
+            <option value="de">de — German</option>
+            <option value="hi">hi — Hindi</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="action-bar">
+        <div class="ab-info" id="basic-status">Fill in title and description to improve your score.</div>
+        <button class="ab-btn secondary" onclick="loadFromPage()">↺ Load from Page</button>
+        <button class="ab-btn primary" onclick="applyAndSave()">Apply & Save</button>
+      </div>
+    </div>
+
+    <!-- ════ SOCIAL MEDIA ════ -->
+    <div class="section-panel" id="panel-social">
+      <div class="panel-hdr">
+        <h1>Social Media</h1>
+        <p>Open Graph tags for Facebook, LinkedIn, WhatsApp & Twitter Card</p>
+      </div>
+
+      <div class="tab-bar">
+        <button class="tab-pill active" onclick="switchOGTab('fb',this)">Facebook / OG</button>
+        <button class="tab-pill" onclick="switchOGTab('tw',this)">Twitter / X</button>
+      </div>
+
+      <!-- OG PANEL -->
+      <div id="og-fb">
+        <div class="card">
+          <div class="card-title"><span class="ct-icon">🌐</span> Open Graph</div>
+          <div class="field">
+            <div class="label">OG Title</div>
+            <input class="inp" type="text" id="og-title" placeholder="Same as page title" oninput="updateSocialPreview()">
+          </div>
+          <div class="field">
+            <div class="label">OG Description</div>
+            <textarea class="inp" rows="2" id="og-desc" placeholder="Short description for social sharing previews…" oninput="updateSocialPreview()"></textarea>
+          </div>
+          <div class="field">
+            <div class="label">OG Image URL <span class="hint">Ideal: 1200×630px</span></div>
+            <div class="inp-group">
+              <input class="inp" type="text" id="og-image" placeholder="https://yourdomain.com/og-image.jpg" oninput="updateSocialPreview()">
+              <input type="file" id="og-img-upload" accept="image/*" style="display:none" onchange="handleOGUpload(event)">
+              <button class="tb-btn" onclick="document.getElementById('og-img-upload').click()" style="flex-shrink:0">📁 Upload</button>
+            </div>
+          </div>
+          <div class="two-col">
+            <div class="field">
+              <div class="label">OG Type</div>
+              <select class="inp" id="og-type">
+                <option value="website">website</option>
+                <option value="article">article</option>
+                <option value="profile">profile</option>
+                <option value="business.business">business.business</option>
+              </select>
+            </div>
+            <div class="field">
+              <div class="label">OG Locale</div>
+              <select class="inp" id="og-locale">
+                <option value="en_US">en_US</option>
+                <option value="en_GB">en_GB</option>
+                <option value="es_ES">es_ES</option>
+                <option value="fr_FR">fr_FR</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title"><span class="ct-icon">👁</span> Social Preview</div>
+          <div class="social-preview" id="social-card">
+            <div class="sp-img"><div class="sp-placeholder">🖼<br><span>1200 × 630px recommended</span></div></div>
+            <div class="sp-info">
+              <div class="sp-domain" id="sp-domain">yourdomain.com</div>
+              <div class="sp-title" id="sp-title">Page title will appear here</div>
+              <div class="sp-desc" id="sp-desc">Description text for social sharing will appear here.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TWITTER PANEL -->
+      <div id="og-tw" style="display:none">
+        <div class="card">
+          <div class="card-title"><span class="ct-icon">🐦</span> Twitter Card</div>
+          <div class="field">
+            <div class="label">Card Type</div>
+            <select class="inp" id="tw-card">
+              <option value="summary_large_image" selected>Summary with Large Image</option>
+              <option value="summary">Summary</option>
+              <option value="app">App</option>
+              <option value="player">Player</option>
+            </select>
+          </div>
+          <div class="field">
+            <div class="label">Twitter Title <span class="hint">Leave blank to use OG title</span></div>
+            <input class="inp" type="text" id="tw-title" placeholder="Overrides OG title on Twitter">
+          </div>
+          <div class="field">
+            <div class="label">Twitter Description</div>
+            <textarea class="inp" rows="2" id="tw-desc" placeholder="Overrides OG description on Twitter…"></textarea>
+          </div>
+          <div class="field">
+            <div class="label">Twitter Image URL <span class="hint">Leave blank to use OG image</span></div>
+            <input class="inp" type="text" id="tw-image" placeholder="Overrides OG image on Twitter">
+          </div>
+          <div class="field">
+            <div class="label">Twitter Site Handle</div>
+            <div class="inp-group">
+              <div class="inp-prefix">@</div>
+              <input class="inp" type="text" id="tw-site" placeholder="YourBrand">
+            </div>
+          </div>
+          <div class="field">
+            <div class="label">Twitter Creator Handle</div>
+            <div class="inp-group">
+              <div class="inp-prefix">@</div>
+              <input class="inp" type="text" id="tw-creator" placeholder="AuthorHandle">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="action-bar">
+        <div class="ab-info">Social tags control how your page appears when shared on social platforms.</div>
+        <button class="ab-btn secondary" onclick="syncFromBasic()">↑ Sync from Basic SEO</button>
+        <button class="ab-btn primary" onclick="applyAndSave()">Apply & Save</button>
+      </div>
+    </div>
+
+    <!-- ════ SCHEMA ════ -->
+    <div class="section-panel" id="panel-schema">
+      <div class="panel-hdr">
+        <h1>Schema / JSON-LD</h1>
+        <p>Structured data helps search engines understand your business context and enables rich results</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="ct-icon">🧩</span> Schema Type</div>
+        <div class="schema-type-grid" id="schema-type-grid">
+          <div class="schema-type-card active" onclick="selectSchema('LocalBusiness',this)" data-type="LocalBusiness"><span class="stc-icon">🏢</span><div class="stc-name">Local Business</div></div>
+          <div class="schema-type-card" onclick="selectSchema('MedicalBusiness',this)" data-type="MedicalBusiness"><span class="stc-icon">🏥</span><div class="stc-name">Medical Business</div></div>
+          <div class="schema-type-card" onclick="selectSchema('Physician',this)" data-type="Physician"><span class="stc-icon">👨‍⚕️</span><div class="stc-name">Physician</div></div>
+          <div class="schema-type-card" onclick="selectSchema('Audiologist',this)" data-type="Audiologist"><span class="stc-icon">👂</span><div class="stc-name">Audiologist</div></div>
+          <div class="schema-type-card" onclick="selectSchema('Organization',this)" data-type="Organization"><span class="stc-icon">🏛</span><div class="stc-name">Organization</div></div>
+          <div class="schema-type-card" onclick="selectSchema('WebSite',this)" data-type="WebSite"><span class="stc-icon">🌐</span><div class="stc-name">WebSite</div></div>
+          <div class="schema-type-card" onclick="selectSchema('FAQPage',this)" data-type="FAQPage"><span class="stc-icon">❓</span><div class="stc-name">FAQ Page</div></div>
+          <div class="schema-type-card" onclick="selectSchema('Service',this)" data-type="Service"><span class="stc-icon">🔧</span><div class="stc-name">Service</div></div>
+        </div>
+      </div>
+
+      <div class="card" id="schema-fields">
+        <div class="card-title"><span class="ct-icon">📋</span> Business Details</div>
+        <div class="two-col">
+          <div class="field">
+            <div class="label">Business Name</div>
+            <input class="inp" type="text" id="s-name" placeholder="The Hearing Aid Doctor" oninput="updateSchemaPreview()">
+          </div>
+          <div class="field">
+            <div class="label">Phone</div>
+            <input class="inp" type="text" id="s-phone" placeholder="+1-555-000-0000" oninput="updateSchemaPreview()">
+          </div>
+          <div class="field">
+            <div class="label">Email</div>
+            <input class="inp" type="email" id="s-email" placeholder="info@hearingaiddoctor.com" oninput="updateSchemaPreview()">
+          </div>
+          <div class="field">
+            <div class="label">Website URL</div>
+            <input class="inp" type="url" id="s-url" placeholder="https://hearingaiddoctor.com" oninput="updateSchemaPreview()">
+          </div>
+        </div>
+        <div class="field">
+          <div class="label">Street Address</div>
+          <input class="inp" type="text" id="s-street" placeholder="123 Main Street" oninput="updateSchemaPreview()">
+        </div>
+        <div class="two-col">
+          <div class="field">
+            <div class="label">City</div>
+            <input class="inp" type="text" id="s-city" placeholder="Northfield" oninput="updateSchemaPreview()">
+          </div>
+          <div class="field">
+            <div class="label">State / Region</div>
+            <input class="inp" type="text" id="s-state" placeholder="MN" oninput="updateSchemaPreview()">
+          </div>
+          <div class="field">
+            <div class="label">Postal Code</div>
+            <input class="inp" type="text" id="s-zip" placeholder="55057" oninput="updateSchemaPreview()">
+          </div>
+          <div class="field">
+            <div class="label">Country</div>
+            <input class="inp" type="text" id="s-country" placeholder="US" oninput="updateSchemaPreview()">
+          </div>
+        </div>
+        <div class="two-col">
+          <div class="field">
+            <div class="label">Latitude</div>
+            <input class="inp" type="text" id="s-lat" placeholder="44.4583" oninput="updateSchemaPreview()">
+          </div>
+          <div class="field">
+            <div class="label">Longitude</div>
+            <input class="inp" type="text" id="s-lng" placeholder="-93.1616" oninput="updateSchemaPreview()">
+          </div>
+        </div>
+        <div class="field">
+          <div class="label">Opening Hours <span class="hint">e.g. Mo-Fr 09:00-17:00</span></div>
+          <input class="inp" type="text" id="s-hours" placeholder="Mo-Fr 09:00-17:00" oninput="updateSchemaPreview()">
+        </div>
+        <div class="field">
+          <div class="label">Price Range</div>
+          <select class="inp" id="s-price" onchange="updateSchemaPreview()">
+            <option value="">— unspecified —</option>
+            <option value="$">$ — Budget</option>
+            <option value="$$">$$ — Moderate</option>
+            <option value="$$$">$$$ — Pricey</option>
+            <option value="$$$$">$$$$ — Luxury</option>
+          </select>
+        </div>
+        <div class="field">
+          <div class="label">Logo URL</div>
+          <input class="inp" type="text" id="s-logo" placeholder="https://yourdomain.com/logo.png" oninput="updateSchemaPreview()">
+        </div>
+        <div class="field">
+          <div class="label">Same As (social profiles) <span class="hint">Comma-separated URLs</span></div>
+          <input class="inp" type="text" id="s-sameas" placeholder="https://facebook.com/…, https://instagram.com/…" oninput="updateSchemaPreview()">
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="ct-icon">👀</span> JSON-LD Preview</div>
+        <div class="schema-preview" id="schema-code">// Fill in details above to generate JSON-LD</div>
+        <div class="code-actions">
+          <button class="code-btn" onclick="copySchema()">📋 Copy</button>
+          <button class="code-btn" onclick="validateSchema()">✓ Validate</button>
+        </div>
+      </div>
+
+      <div class="action-bar">
+        <div class="ab-info">Rich schema can enable rich snippets in Google Search Results.</div>
+        <button class="ab-btn primary" onclick="applyAndSave()">Apply & Save</button>
+      </div>
+    </div>
+
+    <!-- ════ TECHNICAL SEO ════ -->
+    <div class="section-panel" id="panel-technical">
+      <div class="panel-hdr">
+        <h1>Technical SEO</h1>
+        <p>Viewport, charset, performance hints and advanced meta tags</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="ct-icon">📱</span> Core Meta Tags</div>
+        <div class="toggle-row">
+          <div>
+            <div class="tr-label">Viewport meta tag</div>
+            <div class="tr-sub">width=device-width, initial-scale=1 (required for mobile)</div>
+          </div>
+          <label class="toggle"><input type="checkbox" id="tog-viewport" checked><span class="toggle-slider"></span></label>
+        </div>
+        <div class="toggle-row">
+          <div>
+            <div class="tr-label">UTF-8 charset declaration</div>
+            <div class="tr-sub">Ensures correct character encoding</div>
+          </div>
+          <label class="toggle"><input type="checkbox" id="tog-charset" checked><span class="toggle-slider"></span></label>
+        </div>
+        <div class="toggle-row">
+          <div>
+            <div class="tr-label">X-UA-Compatible IE=edge</div>
+            <div class="tr-sub">Legacy IE compatibility header</div>
+          </div>
+          <label class="toggle"><input type="checkbox" id="tog-ie"><span class="toggle-slider"></span></label>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="ct-icon">⚡</span> Performance Hints</div>
+        <div class="toggle-row">
+          <div>
+            <div class="tr-label">DNS Prefetch</div>
+            <div class="tr-sub">Pre-resolve DNS for external domains</div>
+          </div>
+          <label class="toggle"><input type="checkbox" id="tog-dns"><span class="toggle-slider"></span></label>
+        </div>
+        <div class="field" style="margin-top:10px">
+          <div class="label">Prefetch Domains <span class="hint">One per line</span></div>
+          <textarea class="inp mono" rows="3" id="dns-domains" placeholder="//fonts.googleapis.com&#10;//www.google-analytics.com"></textarea>
+        </div>
+        <div class="toggle-row" style="margin-top:4px">
+          <div>
+            <div class="tr-label">Preconnect</div>
+            <div class="tr-sub">Establish early connections to critical origins</div>
+          </div>
+          <label class="toggle"><input type="checkbox" id="tog-preconnect"><span class="toggle-slider"></span></label>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="ct-icon">📊</span> Analytics & Verification</div>
+        <div class="field">
+          <div class="label">Google Analytics Measurement ID</div>
+          <input class="inp mono" type="text" id="ga-id" placeholder="G-XXXXXXXXXX">
+        </div>
+        <div class="field">
+          <div class="label">Google Search Console Verification</div>
+          <input class="inp mono" type="text" id="gsc-verify" placeholder="google-site-verification content value">
+        </div>
+        <div class="field">
+          <div class="label">Bing Webmaster Tools Verification</div>
+          <input class="inp mono" type="text" id="bing-verify" placeholder="msvalidate.01 content value">
+        </div>
+        <div class="field">
+          <div class="label">Facebook Pixel ID</div>
+          <input class="inp mono" type="text" id="fb-pixel" placeholder="1234567890">
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="ct-icon">🔐</span> Security & Policies</div>
+        <div class="field">
+          <div class="label">Referrer Policy</div>
+          <select class="inp" id="referrer-policy">
+            <option value="">— none (browser default) —</option>
+            <option value="no-referrer">no-referrer</option>
+            <option value="origin">origin</option>
+            <option value="strict-origin-when-cross-origin">strict-origin-when-cross-origin (recommended)</option>
+            <option value="no-referrer-when-downgrade">no-referrer-when-downgrade</option>
+          </select>
+        </div>
+        <div class="field">
+          <div class="label">Theme Color <span class="hint">Browser chrome color on mobile</span></div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <input type="color" id="theme-color" value="#1e6b6b" style="width:40px;height:36px;border-radius:7px;border:1px solid var(--border2);background:none;cursor:pointer;padding:2px">
+            <input class="inp" type="text" id="theme-color-txt" value="#1e6b6b" style="flex:1;font-family:'DM Mono',monospace" oninput="document.getElementById('theme-color').value=this.value">
+          </div>
+        </div>
+      </div>
+
+      <div class="action-bar">
+        <div class="ab-info">Technical tags ensure proper rendering and crawling.</div>
+        <button class="ab-btn primary" onclick="applyAndSave()">Apply & Save</button>
+      </div>
+    </div>
+
+    <!-- ════ SITEMAP & ROBOTS ════ -->
+    <div class="section-panel" id="panel-sitemap">
+      <div class="panel-hdr">
+        <h1>Sitemap & Robots.txt</h1>
+        <p>Control crawler access and help search engines discover your pages</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="ct-icon">🗺</span> XML Sitemap</div>
+        <div class="field">
+          <div class="label">Sitemap URL</div>
+          <div class="inp-group">
+            <div class="inp-prefix">https://</div>
+            <input class="inp" type="text" id="sitemap-url" placeholder="yourdomain.com/sitemap.xml">
+          </div>
+        </div>
+        <div class="field">
+          <div class="label">Ping Google</div>
+          <button class="tb-btn" onclick="pingSitemap('google')" style="width:100%;justify-content:center">📡 Ping Google Search Console</button>
+        </div>
+        <div class="field">
+          <div class="label">Ping Bing</div>
+          <button class="tb-btn" onclick="pingSitemap('bing')" style="width:100%;justify-content:center">📡 Ping Bing Webmaster</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="ct-icon">🤖</span> Robots.txt Editor</div>
+        <div class="field">
+          <div class="label">Robots.txt Content</div>
+          <textarea class="inp mono" rows="10" id="robots-txt" placeholder="User-agent: *&#10;Allow: /&#10;Disallow: /admin/&#10;&#10;Sitemap: https://yourdomain.com/sitemap.xml"></textarea>
+        </div>
+        <div class="code-actions">
+          <button class="code-btn" onclick="copyRobots()">📋 Copy</button>
+          <button class="code-btn" onclick="resetRobots()">↺ Reset to default</button>
+          <button class="code-btn" onclick="validateRobots()">✓ Validate</button>
+        </div>
+      </div>
+
+      <div class="action-bar">
+        <div class="ab-info">Sitemap & robots.txt require server-side file creation — save exports the config.</div>
+        <button class="ab-btn secondary" onclick="downloadRobots()">⬇ Download robots.txt</button>
+        <button class="ab-btn primary" onclick="applyAndSave()">Apply & Save</button>
+      </div>
+    </div>
+
+    <!-- ════ REDIRECTS ════ -->
+    <div class="section-panel" id="panel-redirects">
+      <div class="panel-hdr">
+        <h1>Redirects</h1>
+        <p>Manage 301 permanent redirects to preserve link equity when URLs change</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="ct-icon">↪️</span> Redirect Rules</div>
+        <table class="redir-table">
+          <thead>
+            <tr>
+              <th>From (old URL)</th>
+              <th>To (new URL)</th>
+              <th>Type</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="redir-tbody">
+            <tr>
+              <td><input class="inp" type="text" placeholder="/old-page"></td>
+              <td><input class="inp" type="text" placeholder="/new-page"></td>
+              <td><select class="inp"><option value="301">301</option><option value="302">302</option></select></td>
+              <td><button class="del-btn" onclick="this.closest('tr').remove()">✕</button></td>
+            </tr>
+          </tbody>
+        </table>
+        <button class="add-row-btn" onclick="addRedirectRow()">+ Add Redirect Rule</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="ct-icon">📋</span> .htaccess Preview</div>
+        <div class="code-preview" id="htaccess-preview"># Generated redirect rules will appear here</div>
+        <div class="code-actions">
+          <button class="code-btn" onclick="generateHtaccess()">↻ Generate</button>
+          <button class="code-btn" onclick="copyHtaccess()">📋 Copy</button>
+        </div>
+      </div>
+
+      <div class="action-bar">
+        <div class="ab-info">Redirects need to be applied in your server config or .htaccess file.</div>
+        <button class="ab-btn secondary" onclick="generateHtaccess()">↻ Generate .htaccess</button>
+        <button class="ab-btn primary" onclick="applyAndSave()">Apply & Save</button>
+      </div>
+    </div>
+
+    <!-- ════ SEO AUDIT ════ -->
+    <div class="section-panel" id="panel-audit">
+      <div class="panel-hdr">
+        <h1>SEO Audit</h1>
+        <p>Automated checks for common SEO issues on the current page</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="ct-icon">🔎</span> Checklist <button class="code-btn" onclick="runAudit()" style="margin-left:auto">↻ Run Audit</button></div>
+        <div class="checklist" id="audit-list">
+          <div style="color:var(--muted);font-size:13px;padding:12px 0;text-align:center">Click "Run Audit" to analyze the current page</div>
+        </div>
+      </div>
+
+      <div class="action-bar">
+        <div class="ab-info">Audit analyzes the live iframe page for SEO issues.</div>
+        <button class="ab-btn primary" onclick="runAudit()">↻ Run Full Audit</button>
+      </div>
+    </div>
+
+    <!-- ════ PREVIEWS ════ -->
+    <div class="section-panel" id="panel-preview">
+      <div class="panel-hdr">
+        <h1>Search Previews</h1>
+        <p>See how your page appears in Google desktop & mobile results</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="ct-icon">🖥</span> Desktop Result</div>
+        <div class="google-preview">
+          <div class="gp-url" id="gp-url">https://yourdomain.com</div>
+          <div class="gp-title" id="gp-title">Page Title — Brand Name</div>
+          <div class="gp-desc" id="gp-desc">Your meta description will appear here in search results. Keep it concise and compelling.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="ct-icon">📱</span> Mobile Result</div>
+        <div class="gp-mobile-wrap">
+          <div class="gp-mobile-label">Mobile SERP Preview</div>
+          <div class="gp-mobile">
+            <div class="gp-m-url" id="gp-m-url">yourdomain.com</div>
+            <div class="gp-m-title" id="gp-m-title">Page Title — Brand</div>
+            <div class="gp-m-desc" id="gp-m-desc">Your meta description appears here on mobile search results.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="ct-icon">📲</span> Social Share Preview</div>
+        <div class="social-preview" id="social-preview-2">
+          <div class="sp-img"><div class="sp-placeholder">🖼<br><span>OG image (1200×630)</span></div></div>
+          <div class="sp-info">
+            <div class="sp-domain" id="sp2-domain">yourdomain.com</div>
+            <div class="sp-title" id="sp2-title">Page Title</div>
+            <div class="sp-desc" id="sp2-desc">Meta description…</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="action-bar">
+        <div class="ab-info">Previews update as you fill in Basic SEO and Social Media sections.</div>
+        <button class="ab-btn secondary" onclick="updatePreviews()">↻ Refresh Previews</button>
+        <button class="ab-btn primary" onclick="applyAndSave()">Apply & Save</button>
+      </div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /shell -->
+
+<div id="toasts"></div>
+
+<script>
+"use strict";
+
+/* ── NAV ── */
+function gotoSection(id){
+  document.querySelectorAll('.section-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  document.getElementById('nav-'+id).classList.add('active');
+}
+
+function switchOGTab(tab,btn){
+  document.querySelectorAll('.tab-pill').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('og-fb').style.display = tab==='fb'?'block':'none';
+  document.getElementById('og-tw').style.display = tab==='tw'?'block':'none';
+}
+
+/* ── BACK ── */
+function goBack(){
+  if(window.opener) window.opener.focus();
+  window.close();
+  // fallback
+  history.back();
+}
+
+/* ── CHAR COUNTER ── */
+function charCount(el, countId, max){
+  const len = el.value.length;
+  const countEl = document.getElementById(countId);
+  const barId   = countId.replace('count','bar');
+  const barEl   = document.getElementById(barId);
+  countEl.textContent = len+'/'+max;
+  countEl.className   = 'char-count'+(len>max?' over':len>max*.85?' warn':'');
+  if(barEl){
+    const pct = Math.min(100,(len/max)*100);
+    barEl.style.width = pct+'%';
+    barEl.style.background = len>max?'var(--danger)':len>max*.85?'var(--warn)':'var(--success)';
+  }
+}
+
+/* ── TAGS ── */
+const tags = [];
+function handleTagKey(e){
+  const inp = document.getElementById('tag-inp');
+  if((e.key==='Enter'||e.key===',')&&inp.value.trim()){
+    e.preventDefault();
+    addTag(inp.value.trim().replace(/,$/,''));
+    inp.value='';
+  } else if(e.key==='Backspace'&&!inp.value&&tags.length){
+    removeTag(tags.length-1);
+  }
+}
+function addTag(t){
+  if(!t||tags.includes(t))return;
+  tags.push(t);
+  renderTags();
+  updateKeywordsInput();
+}
+function removeTag(i){
+  tags.splice(i,1);
+  renderTags();
+  updateKeywordsInput();
+}
+function renderTags(){
+  const wrap = document.getElementById('tags-wrap');
+  const inp  = document.getElementById('tag-inp');
+  wrap.querySelectorAll('.tag').forEach(t=>t.remove());
+  tags.forEach((t,i)=>{
+    const el = document.createElement('div');
+    el.className='tag';
+    el.innerHTML=`${t}<button onclick="removeTag(${i})">✕</button>`;
+    wrap.insertBefore(el,inp);
+  });
+}
+function updateKeywordsInput(){
+  document.getElementById('seo-keywords').value = tags.join(', ');
+}
+
+/* ── SCHEMA TYPE SELECT ── */
+let activeSchema = 'LocalBusiness';
+function selectSchema(type, el){
+  activeSchema = type;
+  document.querySelectorAll('.schema-type-card').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  updateSchemaPreview();
+}
+
+function updateSchemaPreview(){
+  const name   = v('s-name');
+  const phone  = v('s-phone');
+  const email  = v('s-email');
+  const url    = v('s-url');
+  const street = v('s-street');
+  const city   = v('s-city');
+  const state  = v('s-state');
+  const zip    = v('s-zip');
+  const country= v('s-country');
+  const lat    = v('s-lat');
+  const lng    = v('s-lng');
+  const hours  = v('s-hours');
+  const price  = v('s-price');
+  const logo   = v('s-logo');
+  const sameas = v('s-sameas');
+
+  const schema = { "@context":"https://schema.org", "@type": activeSchema };
+  if(name)   schema.name      = name;
+  if(phone)  schema.telephone = phone;
+  if(email)  schema.email     = email;
+  if(url)    schema.url       = url;
+  if(logo)   schema.logo      = logo;
+  if(hours)  schema.openingHours = hours;
+  if(price)  schema.priceRange  = price;
+  if(lat&&lng) schema.geo = {"@type":"GeoCoordinates","latitude":lat,"longitude":lng};
+  if(street||city){
+    schema.address = {"@type":"PostalAddress"};
+    if(street)  schema.address.streetAddress  = street;
+    if(city)    schema.address.addressLocality= city;
+    if(state)   schema.address.addressRegion  = state;
+    if(zip)     schema.address.postalCode     = zip;
+    if(country) schema.address.addressCountry = country;
+  }
+  if(sameas) schema.sameAs = sameas.split(',').map(s=>s.trim()).filter(Boolean);
+
+  document.getElementById('schema-code').textContent = JSON.stringify(schema,null,2);
+  updateScore();
+}
+
+/* ── PREVIEWS ── */
+function updatePreviews(){
+  const title    = v('seo-title')    || 'Page Title — Brand';
+  const desc     = v('seo-desc')     || 'Your meta description will appear here.';
+  const canonical= v('seo-canonical');
+  const brand    = v('title-brand');
+  const sep      = v('title-sep') || ' — ';
+  const fullTitle = brand ? title+(title.includes(sep)?'':sep+brand) : title;
+  const urlDisp  = canonical ? 'https://'+canonical : window.location.origin;
+
+  // Desktop
+  document.getElementById('gp-url').textContent   = urlDisp;
+  document.getElementById('gp-title').textContent  = fullTitle.slice(0,60);
+  document.getElementById('gp-desc').textContent   = desc.slice(0,160);
+
+  // Mobile
+  const domain = canonical || window.location.hostname;
+  document.getElementById('gp-m-url').textContent  = domain;
+  document.getElementById('gp-m-title').textContent = fullTitle.slice(0,55);
+  document.getElementById('gp-m-desc').textContent  = desc.slice(0,130);
+
+  // Social
+  updateSocialPreview();
+}
+
+function updateSocialPreview(){
+  const title = v('og-title') || v('seo-title') || 'Page Title';
+  const desc  = v('og-desc')  || v('seo-desc')  || 'Description…';
+  const img   = v('og-image');
+  const canon = v('seo-canonical');
+  const domain= canon || window.location.hostname;
+
+  ['sp-domain','sp2-domain'].forEach(id=>document.getElementById(id).textContent=domain);
+  ['sp-title','sp2-title'].forEach(id=>document.getElementById(id).textContent=title);
+  ['sp-desc','sp2-desc'].forEach(id=>document.getElementById(id).textContent=desc);
+
+  // Image
+  [document.getElementById('social-card'),document.getElementById('social-preview-2')].forEach(card=>{
+    if(!card)return;
+    const imgDiv = card.querySelector('.sp-img');
+    if(img){
+      imgDiv.style.backgroundImage=`url(${img})`;
+      imgDiv.style.backgroundSize='cover';
+      imgDiv.style.backgroundPosition='center';
+      imgDiv.querySelector('.sp-placeholder').style.display='none';
+    }
+  });
+}
+
+/* ── SCORE ── */
+function updateScore(){
+  let score = 0;
+  const titleLen = v('seo-title').length;
+  const descLen  = v('seo-desc').length;
+  const schemaOk = v('s-name').length>0;
+  const ogOk     = v('og-title').length>0 || v('og-image').length>0;
+
+  const tOk  = titleLen>=10&&titleLen<=60;
+  const dOk  = descLen>=100&&descLen<=160;
+
+  if(tOk){score+=30;setScoreLabel('sc-title','ok','✓ ok');}
+  else if(titleLen>0){score+=10;setScoreLabel('sc-title','warn','!  short');}
+  else setScoreLabel('sc-title','bad','✕ missing');
+
+  if(dOk){score+=30;setScoreLabel('sc-desc','ok','✓ ok');}
+  else if(descLen>0){score+=10;setScoreLabel('sc-desc','warn','! length');}
+  else setScoreLabel('sc-desc','bad','✕ missing');
+
+  if(schemaOk){score+=20;setScoreLabel('sc-schema','ok','✓ ok');}
+  else setScoreLabel('sc-schema','warn','! empty');
+
+  if(ogOk){score+=20;setScoreLabel('sc-og','ok','✓ ok');}
+  else setScoreLabel('sc-og','warn','! empty');
+
+  document.getElementById('score-num').textContent = score;
+  const circ = document.getElementById('score-circle');
+  const circumference = 138.2;
+  const offset = circumference - (score/100)*circumference;
+  circ.style.strokeDashoffset = offset;
+  circ.style.stroke = score>=70?'var(--success)':score>=40?'var(--warn)':'var(--danger)';
+}
+
+function setScoreLabel(id,cls,text){
+  const el = document.getElementById(id);
+  el.textContent = text;
+  el.className = 'sl-val '+cls;
+}
+
+/* ── AUDIT ── */
+function runAudit(){
+  const list = document.getElementById('audit-list');
+  const checks = [];
+
+  const title = v('seo-title');
+  const desc  = v('seo-desc');
+  const kw    = v('seo-primary-kw');
+  const canon = v('seo-canonical');
+  const robots= v('seo-robots');
+  const ogImg = v('og-image');
+  const schemaName = v('s-name');
+
+  checks.push({
+    status: title.length>=10&&title.length<=60?'ok':title.length>0?'warn':'bad',
+    title: 'Page Title',
+    desc: title.length===0?'Title is missing. This is critical for SEO.'
+      :title.length<10?`Title too short (${title.length} chars). Aim for 30–60.`
+      :title.length>60?`Title too long (${title.length} chars). Trim to under 60.`
+      :`Title looks good (${title.length}/60 chars).`
+  });
+
+  checks.push({
+    status: desc.length>=100&&desc.length<=160?'ok':desc.length>0?'warn':'bad',
+    title: 'Meta Description',
+    desc: desc.length===0?'Description is missing. Write 100–160 characters.'
+      :desc.length<100?`Too short (${desc.length} chars). Aim for 100–160.`
+      :desc.length>160?`Too long (${desc.length} chars). Keep under 160.`
+      :`Description looks good (${desc.length}/160 chars).`
+  });
+
+  checks.push({
+    status: kw.length>0?'ok':'warn',
+    title: 'Primary Keyword',
+    desc: kw?`Primary keyword set: "${kw}"`:'No primary keyword defined. Set a focus keyword.'
+  });
+
+  checks.push({
+    status: canon.length>0?'ok':'warn',
+    title: 'Canonical URL',
+    desc: canon?'Canonical URL is set — prevents duplicate content issues.':'Canonical URL missing. Helps prevent duplicate content.'
+  });
+
+  checks.push({
+    status: ogImg.length>0?'ok':'warn',
+    title: 'OG Image',
+    desc: ogImg?'Open Graph image is set — good for social sharing.':'No OG image set. Social shares may look blank.'
+  });
+
+  checks.push({
+    status: schemaName.length>0?'ok':'info',
+    title: 'Structured Data / Schema',
+    desc: schemaName?`Schema for "${schemaName}" configured.`:'No schema data filled in. Schema can enable rich results.'
+  });
+
+  checks.push({
+    status: robots==='index, follow'?'ok':'warn',
+    title: 'Robots Directive',
+    desc: robots==='index, follow'?'Set to index, follow — search engines will crawl this page.'
+      :`Currently set to "${robots}" — review if intentional.`
+  });
+
+  const icons = {ok:'✓',warn:'!',bad:'✕',info:'i'};
+  list.innerHTML = checks.map(c=>`
+    <div class="check-item">
+      <div class="ci-icon ${c.status}">${icons[c.status]}</div>
+      <div class="ci-text">
+        <div class="ci-title">${c.title}</div>
+        <div class="ci-desc">${c.desc}</div>
+      </div>
+    </div>
+  `).join('');
+
+  toast('✅ Audit complete — '+checks.filter(c=>c.status==='ok').length+'/'+checks.length+' checks passed','ok');
+}
+
+/* ── REDIRECTS ── */
+function addRedirectRow(){
+  const tbody = document.getElementById('redir-tbody');
+  const tr = document.createElement('tr');
+  tr.innerHTML=`
+    <td><input class="inp" type="text" placeholder="/old-url"></td>
+    <td><input class="inp" type="text" placeholder="/new-url"></td>
+    <td><select class="inp"><option value="301">301</option><option value="302">302</option></select></td>
+    <td><button class="del-btn" onclick="this.closest('tr').remove()">✕</button></td>`;
+  tbody.appendChild(tr);
+}
+
+function generateHtaccess(){
+  const rows = document.querySelectorAll('#redir-tbody tr');
+  let out = 'RewriteEngine On\n\n';
+  rows.forEach(row=>{
+    const from = row.querySelectorAll('input')[0].value.trim();
+    const to   = row.querySelectorAll('input')[1].value.trim();
+    const type = row.querySelector('select').value;
+    if(from&&to){
+      out += `RewriteRule ^${from.replace(/^\//,'')}$ ${to} [R=${type},L]\n`;
+    }
+  });
+  document.getElementById('htaccess-preview').textContent = out||'# No rules defined';
+  toast('↻ .htaccess generated','ok');
+}
+
+function copyHtaccess(){
+  navigator.clipboard.writeText(document.getElementById('htaccess-preview').textContent).then(()=>toast('📋 Copied','ok'));
+}
+
+/* ── ROBOTS.TXT ── */
+function resetRobots(){
+  document.getElementById('robots-txt').value='User-agent: *\nAllow: /\nDisallow: /admin/\nDisallow: /private/\n\nSitemap: https://yourdomain.com/sitemap.xml';
+}
+function copyRobots(){
+  navigator.clipboard.writeText(document.getElementById('robots-txt').value).then(()=>toast('📋 Copied','ok'));
+}
+function validateRobots(){
+  const val = document.getElementById('robots-txt').value;
+  if(val.includes('User-agent:')&&(val.includes('Allow:')||val.includes('Disallow:'))){
+    toast('✓ robots.txt syntax looks valid','ok');
+  } else {
+    toast('⚠ robots.txt may have issues — check syntax','err');
+  }
+}
+function downloadRobots(){
+  const blob = new Blob([document.getElementById('robots-txt').value],{type:'text/plain'});
+  const a = document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download='robots.txt'; a.click();
+}
+
+/* ── SITEMAP PING ── */
+function pingSitemap(engine){
+  const url = v('sitemap-url');
+  if(!url){toast('⚠ Enter your sitemap URL first','err');return;}
+  const fullUrl = 'https://'+url;
+  if(engine==='google'){
+    window.open(`https://www.google.com/ping?sitemap=${encodeURIComponent(fullUrl)}`,'_blank');
+  } else {
+    window.open(`https://www.bing.com/ping?sitemap=${encodeURIComponent(fullUrl)}`,'_blank');
+  }
+}
+
+/* ── OG IMAGE UPLOAD ── */
+function handleOGUpload(e){
+  const file = e.target.files[0]; if(!file)return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    document.getElementById('og-image').value = ev.target.result;
+    updateSocialPreview();
+    toast('✅ OG image set — upload to server for a permanent URL','ok');
+  };
+  reader.readAsDataURL(file);
+}
+
+/* ── SCHEMA UTILITIES ── */
+function copySchema(){
+  navigator.clipboard.writeText(document.getElementById('schema-code').textContent).then(()=>toast('📋 Schema copied','ok'));
+}
+function validateSchema(){
+  try{
+    JSON.parse(document.getElementById('schema-code').textContent);
+    toast('✓ Valid JSON-LD schema','ok');
+    window.open('https://search.google.com/test/rich-results','_blank');
+  } catch(e){
+    toast('✕ Invalid JSON: '+e.message,'err');
+  }
+}
+
+/* ── SYNC FROM BASIC ── */
+function syncFromBasic(){
+  if(!v('og-title')) document.getElementById('og-title').value = v('seo-title');
+  if(!v('og-desc'))  document.getElementById('og-desc').value  = v('seo-desc');
+  updateSocialPreview();
+  toast('↑ Synced from Basic SEO','ok');
+}
+
+/* ── LOAD FROM PAGE ── */
+function loadFromPage(){
+  try{
+    const opener = window.opener;
+    if(opener&&opener.getDoc){
+      const doc = opener.getDoc();
+      if(doc){
+        const title = doc.title;
+        const desc  = (doc.querySelector('meta[name="description"]')||{}).getAttribute?.('content')||'';
+        const kws   = (doc.querySelector('meta[name="keywords"]')  ||{}).getAttribute?.('content')||'';
+        const canon = (doc.querySelector("link[rel='canonical']")  ||{}).getAttribute?.('href')||'';
+        if(title) document.getElementById('seo-title').value = title;
+        if(desc)  document.getElementById('seo-desc').value  = desc;
+        if(kws)   document.getElementById('seo-meta-keywords').value = kws;
+        if(canon) document.getElementById('seo-canonical').value = canon.replace(/^https?:\/\//,'');
+        charCount(document.getElementById('seo-title'),'title-count',60);
+        charCount(document.getElementById('seo-desc'),'desc-count',160);
+        updatePreviews();
+        updateScore();
+        toast('↺ Loaded data from page','ok');
+        return;
+      }
+    }
+  } catch(e){}
+  toast('⚠ Could not read from parent page','err');
+}
+
+/* ── APPLY & SAVE ── */
+async function applyAndSave(){
+  try{
+    const opener = window.opener;
+    if(opener&&opener.seoEditorApply){
+      const data = gatherData();
+      await opener.seoEditorApply(data);
+      toast('✅ SEO applied & saved','ok');
+      markSaved();
+    } else {
+      // fallback: download as JSON
+      const blob = new Blob([JSON.stringify(gatherData(),null,2)],{type:'application/json'});
+      const a = document.createElement('a'); a.href=URL.createObjectURL(blob);
+      a.download='seo-config.json'; a.click();
+      toast('⬇ SEO config exported (no parent editor detected)','ok');
+    }
+  } catch(e){
+    toast('❌ Error: '+e.message,'err');
+  }
+}
+
+function gatherData(){
+  return {
+    title:v('seo-title'), desc:v('seo-desc'), keywords:v('seo-keywords'),
+    primaryKeyword:v('seo-primary-kw'), metaKeywords:v('seo-meta-keywords'),
+    robots:v('seo-robots'), canonical:'https://'+v('seo-canonical'),
+    lang:v('seo-lang'),
+    og:{title:v('og-title'),desc:v('og-desc'),image:v('og-image'),type:v('og-type'),locale:v('og-locale')},
+    twitter:{card:v('tw-card'),title:v('tw-title'),desc:v('tw-desc'),image:v('tw-image'),site:'@'+v('tw-site'),creator:'@'+v('tw-creator')},
+    schema:{type:activeSchema,name:v('s-name'),phone:v('s-phone'),email:v('s-email'),url:v('s-url'),
+      street:v('s-street'),city:v('s-city'),state:v('s-state'),zip:v('s-zip'),country:v('s-country'),
+      lat:v('s-lat'),lng:v('s-lng'),hours:v('s-hours'),price:v('s-price'),logo:v('s-logo'),
+      sameas:v('s-sameas')},
+    technical:{gaId:v('ga-id'),gscVerify:v('gsc-verify'),bingVerify:v('bing-verify'),fbPixel:v('fb-pixel'),
+      themeColor:v('theme-color'),referrer:v('referrer-policy'),dnsText:v('dns-domains')},
+    robots_txt:v('robots-txt'), sitemapUrl:v('sitemap-url'),
+    schemaJSON:document.getElementById('schema-code').textContent
+  };
+}
+
+/* ── DIRTY STATE ── */
+let _dirty = false;
+function markDirty(){
+  _dirty=true;
+  document.getElementById('save-dot').classList.add('dirty');
+  document.getElementById('save-label').textContent='Unsaved changes';
+}
+function markSaved(){
+  _dirty=false;
+  document.getElementById('save-dot').classList.remove('dirty');
+  document.getElementById('save-label').textContent='All saved';
+}
+
+/* ── HELPERS ── */
+function v(id){return(document.getElementById(id)||{}).value||''}
+
+function toast(msg,type){
+  const wrap=document.getElementById('toasts');
+  const t=document.createElement('div');
+  t.className='t-toast '+(type||'');
+  t.textContent=msg;
+  wrap.appendChild(t);
+  setTimeout(()=>{t.style.opacity='0';t.style.transition='opacity .3s';setTimeout(()=>t.remove(),300)},3200);
+}
+
+/* ── INIT ── */
+document.addEventListener('DOMContentLoaded',()=>{
+  resetRobots();
+  updateScore();
+  // Attach dirty listeners
+  document.querySelectorAll('.inp,.toggle input').forEach(el=>{
+    el.addEventListener('input',()=>{markDirty();updateScore()});
+  });
+  // Try to load from parent
+  setTimeout(loadFromPage,400);
+});
+</script>
+</body>
+</html>
