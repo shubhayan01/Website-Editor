@@ -25,7 +25,7 @@ const path    = require("path");
 const { URL } = require("url");
 
 /* ── CONFIG ── */
-const PORT        = 3333;
+const PORT = process.env.PORT || 3333;
 const ED_USER     = "admin";
 const ED_PASS     = "hearingdoctor2026";
 const SITE_FILE   = path.join(__dirname, "index.html");
