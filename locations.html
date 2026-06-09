@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Our Locations — The Hearing Aid Doctor</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--teal:#1a5c5a;--teal-light:#2a7d7b;--dark:#0d2b2a;--gray:#f5f7f7;--text:#2d3a3a}
+body{font-family:'DM Sans',sans-serif;color:var(--text);overflow-x:hidden}
+.topbar{background:var(--dark);color:#cde8e7;font-size:13px;padding:8px 40px;display:flex;justify-content:space-between;align-items:center}
+nav{display:flex;justify-content:space-between;align-items:center;padding:16px 40px;background:#fff;border-bottom:1px solid #e8f0ef;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.06)}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-icon{width:44px;height:44px;background:var(--teal);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:22px}
+.logo-text{font-family:'Playfair Display',serif;font-size:18px;line-height:1.1;color:var(--dark)}
+.logo-text span{display:block;font-size:13px;font-family:'DM Sans',sans-serif;font-weight:400;color:#666}
+.nav-links{display:flex;gap:28px;list-style:none}
+.nav-links a{text-decoration:none;color:var(--text);font-size:14px;font-weight:500;transition:color .2s}
+.nav-links a:hover,.nav-links a.active{color:var(--teal)}
+.btn-primary{background:var(--teal);color:#fff;border:none;padding:11px 22px;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:background .2s;text-decoration:none;display:inline-block}
+.btn-primary:hover{background:var(--teal-light)}
+/* PAGE HERO */
+.page-hero{background:linear-gradient(135deg,#0d3332 0%,#1a5c5a 100%);padding:64px 40px;text-align:center;color:#fff}
+.page-hero .eyebrow{font-size:11px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;color:#7ecece;margin-bottom:14px}
+.page-hero h1{font-family:'Playfair Display',serif;font-size:46px;line-height:1.1;margin-bottom:14px}
+.page-hero p{font-size:15px;color:#cde8e7;max-width:560px;margin:0 auto;line-height:1.65}
+/* CONTENT */
+.section{padding:70px 40px}
+.section-inner{max-width:1060px;margin:0 auto}
+.section-eyebrow{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--teal);margin-bottom:12px;display:flex;align-items:center;gap:10px}
+.section-eyebrow::before{content:'';display:block;width:32px;height:2px;background:var(--teal)}
+/* LOCATION CARDS */
+.loc-cards-full{display:flex;flex-direction:column;gap:36px;margin-top:48px}
+.loc-card-full{background:#fff;border-radius:16px;overflow:hidden;border:1.5px solid #dde8e8;display:grid;grid-template-columns:280px 1fr}
+.loc-map-full{background:linear-gradient(135deg,#c8dede,#1a5c5a);display:flex;align-items:center;justify-content:center;font-size:72px}
+.loc-card-body{padding:36px 40px}
+.loc-badge{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--teal);background:rgba(26,92,90,.08);padding:4px 10px;border-radius:20px;display:inline-block;margin-bottom:14px}
+.loc-card-body h2{font-family:'Playfair Display',serif;font-size:28px;color:var(--dark);margin-bottom:6px}
+.loc-card-body address{font-style:normal;font-size:14px;color:#666;line-height:1.65;margin-bottom:18px}
+.loc-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:24px}
+.loc-info-item{background:var(--gray);border-radius:8px;padding:12px 14px}
+.loc-info-label{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#888;margin-bottom:4px}
+.loc-info-val{font-size:14px;color:var(--dark);font-weight:500}
+.loc-btns{display:flex;gap:10px;flex-wrap:wrap}
+.btn-sm{padding:10px 20px;border-radius:6px;font-size:13.5px;font-weight:600;cursor:pointer;text-decoration:none;display:inline-block;transition:all .2s}
+.btn-sm-teal{background:var(--teal);color:#fff;border:none}
+.btn-sm-teal:hover{background:var(--teal-light)}
+.btn-sm-outline{border:1.5px solid var(--teal);color:var(--teal);background:transparent}
+.btn-sm-outline:hover{background:rgba(26,92,90,.06)}
+/* HOURS TABLE */
+.hours-table{width:100%;border-collapse:collapse;margin-top:10px}
+.hours-table td{padding:6px 0;font-size:13px;border-bottom:1px solid #eef2f2}
+.hours-table tr:last-child td{border-bottom:none}
+.hours-table td:first-child{color:#555;font-weight:500;width:50%}
+.hours-table td:last-child{color:var(--dark);font-weight:600}
+.closed-td{color:#aaa !important;font-weight:400 !important}
+/* SERVICE AREA */
+.service-area{background:var(--dark);padding:60px 40px;text-align:center;color:#fff}
+.service-area h2{font-family:'Playfair Display',serif;font-size:36px;margin-bottom:12px}
+.service-area h2 em{color:#7ecece;font-style:italic}
+.service-area p{font-size:14px;color:#9ecece;max-width:540px;margin:0 auto 36px;line-height:1.7}
+.city-list{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;max-width:700px;margin:0 auto}
+.city-tag{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);color:#cde8e7;padding:7px 16px;border-radius:20px;font-size:13px}
+/* CTA */
+.cta{background:linear-gradient(135deg,#0d3332,#1a5c5a);padding:70px 40px;text-align:center;color:#fff}
+.cta h2{font-family:'Playfair Display',serif;font-size:38px;margin-bottom:10px}
+.cta h2 em{color:#7ecece;font-style:italic}
+.cta p{font-size:15px;color:#cde8e7;max-width:480px;margin:0 auto 28px;line-height:1.65}
+.btn-outline{border:2px solid #fff;color:#fff;background:transparent;padding:12px 26px;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;text-decoration:none;display:inline-block}
+.btn-outline:hover{background:#fff;color:var(--teal)}
+/* FOOTER */
+footer{background:#050f0f;padding:50px 40px 24px;color:#fff}
+.footer-inner{display:grid;grid-template-columns:260px 1fr 1fr 1fr;gap:40px;margin-bottom:40px}
+.footer-logo{font-family:'Playfair Display',serif;font-size:20px;color:#fff;margin-bottom:12px}
+.footer-desc{font-size:13px;color:#7a9a9a;line-height:1.65;margin-bottom:18px}
+.footer-locs{font-size:13px;color:#9ecece;line-height:2}
+.footer-col h4{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#7ecece;margin-bottom:16px}
+.footer-col ul{list-style:none}
+.footer-col ul li{margin-bottom:8px}
+.footer-col ul li a{text-decoration:none;font-size:13px;color:#9ecece;transition:color .2s}
+.footer-col ul li a:hover{color:#fff}
+.footer-bottom{border-top:1px solid rgba(255,255,255,.08);padding-top:20px;display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#556}
+.footer-bottom a{color:#7ecece;text-decoration:none}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div style="display:flex;gap:30px">
+    <span>📍 3 Locations in Minnesota</span>
+    <span>📅 Mon-Fri, flexible appointments</span>
+  </div>
+  <span>Toll Free: <strong>(800) 660-9804</strong></span>
+</div>
+<nav>
+  <div class="logo">
+    <div class="logo-icon">🦻</div>
+    <div class="logo-text">The<br><strong>Hearing Aid Doctor</strong><span>Minnesota's Hearing Care Professionals</span></div>
+  </div>
+  <ul class="nav-links">
+    <li><a href="/">Home</a></li>
+    <li><a href="/services.html">Hearing Aid Solutions</a></li>
+    <li><a href="/hearing-test.html">Hearing Test</a></li>
+    <li><a href="/about.html">About Us</a></li>
+    <li><a href="/#contact" style="color:var(--teal)">Contact Us</a></li>
+  </ul>
+  <a href="/#contact" class="btn-primary">Request a Call Back</a>
+</nav>
+
+<div class="page-hero">
+  <div class="eyebrow">Find Us</div>
+  <h1>3 Locations. <em style="color:#7ecece;font-style:italic">One Standard of Care.</em></h1>
+  <p>Serving Southern Minnesota with professional, compassionate hearing care across Lakeville, Northfield, and Stewartville.</p>
+</div>
+
+<section class="section" style="background:var(--gray)">
+  <div class="section-inner">
+    <div class="section-eyebrow" style="justify-content:center">Our Clinics</div>
+    <h2 style="font-family:'Playfair Display',serif;font-size:36px;color:var(--dark);text-align:center">Find Your <em style="color:var(--teal);font-style:italic">Nearest Location</em></h2>
+    <p style="text-align:center;font-size:14px;color:#666;margin-top:8px">Walk-ins welcome. Appointments recommended for hearing evaluations.</p>
+
+    <div class="loc-cards-full">
+
+      <!-- LAKEVILLE -->
+      <div class="loc-card-full">
+        <div class="loc-map-full">🗺️</div>
+        <div class="loc-card-body">
+          <div class="loc-badge">Lakeville, MN</div>
+          <h2>Lakeville Clinic</h2>
+          <address>16233 Kenyon Ave, Suite 101<br>Lakeville, MN 55044</address>
+          <div class="loc-info-grid">
+            <div class="loc-info-item">
+              <div class="loc-info-label">Phone</div>
+              <div class="loc-info-val"><a href="tel:9522558579" style="color:var(--teal);text-decoration:none">(952) 255-8579</a></div>
+            </div>
+            <div class="loc-info-item">
+              <div class="loc-info-label">Walk-ins</div>
+              <div class="loc-info-val">Welcome</div>
+            </div>
+            <div class="loc-info-item" style="grid-column:span 2">
+              <div class="loc-info-label">Office Hours</div>
+              <table class="hours-table">
+                <tr><td>Monday – Friday</td><td>9:00 AM – 5:00 PM</td></tr>
+                <tr><td>Saturday</td><td class="closed-td">Closed</td></tr>
+                <tr><td>Sunday</td><td class="closed-td">Closed</td></tr>
+              </table>
+            </div>
+          </div>
+          <div class="loc-btns">
+            <a href="tel:9522558579" class="btn-sm btn-sm-teal">📞 Call Now</a>
+            <a href="https://maps.google.com/?q=16233+Kenyon+Ave,+Lakeville,+MN+55044" target="_blank" class="btn-sm btn-sm-outline">🗺 Directions</a>
+            <a href="/#contact" class="btn-sm btn-sm-outline">📅 Book Appointment</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- NORTHFIELD -->
+      <div class="loc-card-full">
+        <div class="loc-map-full">🗺️</div>
+        <div class="loc-card-body">
+          <div class="loc-badge">Northfield, MN</div>
+          <h2>Northfield Clinic</h2>
+          <address>507 South Water Street<br>Northfield, MN 55057</address>
+          <div class="loc-info-grid">
+            <div class="loc-info-item">
+              <div class="loc-info-label">Phone</div>
+              <div class="loc-info-val"><a href="tel:5076450860" style="color:var(--teal);text-decoration:none">(507) 645-0860</a></div>
+            </div>
+            <div class="loc-info-item">
+              <div class="loc-info-label">Walk-ins</div>
+              <div class="loc-info-val">Welcome</div>
+            </div>
+            <div class="loc-info-item" style="grid-column:span 2">
+              <div class="loc-info-label">Office Hours</div>
+              <table class="hours-table">
+                <tr><td>Monday – Friday</td><td>9:00 AM – 5:00 PM</td></tr>
+                <tr><td>Saturday</td><td class="closed-td">Closed</td></tr>
+                <tr><td>Sunday</td><td class="closed-td">Closed</td></tr>
+              </table>
+            </div>
+          </div>
+          <div class="loc-btns">
+            <a href="tel:5076450860" class="btn-sm btn-sm-teal">📞 Call Now</a>
+            <a href="https://maps.google.com/?q=507+South+Water+Street,+Northfield,+MN+55057" target="_blank" class="btn-sm btn-sm-outline">🗺 Directions</a>
+            <a href="/#contact" class="btn-sm btn-sm-outline">📅 Book Appointment</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEWARTVILLE -->
+      <div class="loc-card-full">
+        <div class="loc-map-full">🗺️</div>
+        <div class="loc-card-body">
+          <div class="loc-badge">Stewartville, MN</div>
+          <h2>Stewartville Clinic</h2>
+          <address>216 Centertown Plaza<br>Stewartville, MN 55976</address>
+          <div class="loc-info-grid">
+            <div class="loc-info-item">
+              <div class="loc-info-label">Phone</div>
+              <div class="loc-info-val"><a href="tel:5075334099" style="color:var(--teal);text-decoration:none">(507) 533-4099</a></div>
+            </div>
+            <div class="loc-info-item">
+              <div class="loc-info-label">Walk-ins</div>
+              <div class="loc-info-val">Welcome</div>
+            </div>
+            <div class="loc-info-item" style="grid-column:span 2">
+              <div class="loc-info-label">Office Hours</div>
+              <table class="hours-table">
+                <tr><td>Monday – Friday</td><td>9:00 AM – 5:00 PM</td></tr>
+                <tr><td>Saturday</td><td class="closed-td">Closed</td></tr>
+                <tr><td>Sunday</td><td class="closed-td">Closed</td></tr>
+              </table>
+            </div>
+          </div>
+          <div class="loc-btns">
+            <a href="tel:5075334099" class="btn-sm btn-sm-teal">📞 Call Now</a>
+            <a href="https://maps.google.com/?q=216+Centertown+Plaza,+Stewartville,+MN+55976" target="_blank" class="btn-sm btn-sm-outline">🗺 Directions</a>
+            <a href="/#contact" class="btn-sm btn-sm-outline">📅 Book Appointment</a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<div class="service-area">
+  <h2>Serving All of <em>Southern Minnesota</em></h2>
+  <p>Our three clinics are conveniently located to serve patients from across the region — from the Twin Cities metro to the Rochester area.</p>
+  <div class="city-list">
+    <span class="city-tag">Lakeville</span><span class="city-tag">Northfield</span><span class="city-tag">Stewartville</span><span class="city-tag">Apple Valley</span><span class="city-tag">Burnsville</span><span class="city-tag">Faribault</span><span class="city-tag">Rochester</span><span class="city-tag">Owatonna</span><span class="city-tag">Prior Lake</span><span class="city-tag">Savage</span><span class="city-tag">Shakopee</span><span class="city-tag">Farmington</span>
+  </div>
+</div>
+
+<section class="cta">
+  <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#7ecece;margin-bottom:12px">Get Started</div>
+  <h2>Ready to <em>Visit Us?</em></h2>
+  <p>Call any location directly or fill out our contact form — we'll connect you with the nearest specialist and schedule your free evaluation.</p>
+  <div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap">
+    <a href="/#contact" class="btn-primary" style="padding:13px 28px">📞 Request a Call Back</a>
+    <a href="/hearing-test.html" class="btn-outline" style="padding:13px 28px">About Our Hearing Tests →</a>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-inner">
+    <div>
+      <div class="footer-logo">🦻 The Hearing Aid Doctor</div>
+      <p class="footer-desc">Professional hearing care across three Minnesota locations.</p>
+      <div class="footer-locs">📍 Lakeville: (952) 255-8579<br>📍 Northfield: (507) 645-0860<br>📍 Stewartville: (507) 533-4099</div>
+    </div>
+    <div class="footer-col"><h4>Services</h4><ul><li><a href="/services.html">Hearing Aid Solutions</a></li><li><a href="/hearing-test.html">Hearing Test</a></li><li><a href="/services.html">Repairs &amp; Servicing</a></li><li><a href="/services.html">Tinnitus Treatment</a></li></ul></div>
+    <div class="footer-col"><h4>Locations</h4><ul><li><a href="/locations.html">Lakeville, MN</a></li><li><a href="/locations.html">Northfield, MN</a></li><li><a href="/locations.html">Stewartville, MN</a></li></ul></div>
+    <div class="footer-col"><h4>Company</h4><ul><li><a href="/about.html">About Us</a></li><li><a href="/about.html">Meet the Team</a></li><li><a href="/#contact">Contact Us</a></li></ul></div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 The Hearing Aid Doctor · All Rights Reserved</span>
+    <div style="display:flex;gap:16px"><a href="#">Privacy Policy</a><a href="#">Accessibility</a><span style="color:#334">Powered by eMod</span></div>
+  </div>
+</footer>
+</body>
+</html>

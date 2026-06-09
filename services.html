@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hearing Aid Solutions — The Hearing Aid Doctor</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--teal:#1a5c5a;--teal-light:#2a7d7b;--dark:#0d2b2a;--gray:#f5f7f7;--text:#2d3a3a}
+body{font-family:'DM Sans',sans-serif;color:var(--text);overflow-x:hidden}
+.topbar{background:var(--dark);color:#cde8e7;font-size:13px;padding:8px 40px;display:flex;justify-content:space-between;align-items:center}
+nav{display:flex;justify-content:space-between;align-items:center;padding:16px 40px;background:#fff;border-bottom:1px solid #e8f0ef;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.06)}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-icon{width:44px;height:44px;background:var(--teal);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:22px}
+.logo-text{font-family:'Playfair Display',serif;font-size:18px;line-height:1.1;color:var(--dark)}
+.logo-text span{display:block;font-size:13px;font-family:'DM Sans',sans-serif;font-weight:400;color:#666}
+.nav-links{display:flex;gap:28px;list-style:none}
+.nav-links a{text-decoration:none;color:var(--text);font-size:14px;font-weight:500;transition:color .2s}
+.nav-links a:hover,.nav-links a.active{color:var(--teal)}
+.btn-primary{background:var(--teal);color:#fff;border:none;padding:11px 22px;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:background .2s;text-decoration:none;display:inline-block}
+.btn-primary:hover{background:var(--teal-light)}
+/* PAGE HERO */
+.page-hero{background:linear-gradient(135deg,#0d3332 0%,#1a5c5a 100%);padding:64px 40px;text-align:center;color:#fff}
+.page-hero .eyebrow{font-size:11px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;color:#7ecece;margin-bottom:14px}
+.page-hero h1{font-family:'Playfair Display',serif;font-size:46px;line-height:1.1;margin-bottom:14px}
+.page-hero p{font-size:15px;color:#cde8e7;max-width:560px;margin:0 auto;line-height:1.65}
+/* CONTENT */
+.section{padding:70px 40px}
+.section-inner{max-width:1000px;margin:0 auto}
+.section-eyebrow{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--teal);margin-bottom:12px;display:flex;align-items:center;gap:10px}
+.section-eyebrow::before{content:'';display:block;width:32px;height:2px;background:var(--teal)}
+/* SERVICE CARDS */
+.service-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;margin-top:40px}
+.service-card{background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 2px 14px rgba(0,0,0,.07)}
+.service-img{height:180px;background:linear-gradient(135deg,#c8dede,#9ecece);display:flex;align-items:center;justify-content:center;font-size:52px}
+.service-body{padding:26px}
+.service-body h3{font-family:'Playfair Display',serif;font-size:21px;color:var(--teal);margin-bottom:10px}
+.service-body p{font-size:13px;color:#666;line-height:1.65;margin-bottom:18px}
+.learn-btn{display:inline-flex;align-items:center;gap:5px;font-size:13px;font-weight:600;color:var(--teal);text-decoration:none}
+/* PROCESS */
+.process-steps{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin-top:40px;position:relative}
+.process-steps::before{content:'';position:absolute;top:28px;left:10%;right:10%;height:2px;background:linear-gradient(90deg,var(--teal),#7ecece);z-index:0}
+.step{text-align:center;position:relative;z-index:1}
+.step-num{width:56px;height:56px;background:var(--teal);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:22px;color:#fff;margin:0 auto 16px;border:3px solid #fff;box-shadow:0 2px 12px rgba(26,92,90,.3)}
+.step h4{font-size:14px;font-weight:700;color:var(--dark);margin-bottom:8px}
+.step p{font-size:12.5px;color:#666;line-height:1.6}
+/* BRANDS */
+.brands-section{background:var(--dark);padding:50px 40px;text-align:center}
+.brands-label{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#7ecece;margin-bottom:24px}
+.brands-list{display:flex;flex-wrap:wrap;justify-content:center;gap:28px}
+.brand{font-size:16px;font-weight:600;color:#9ecece;transition:color .2s;cursor:pointer}
+.brand:hover{color:#fff}
+/* FAQ */
+.faq-list{display:flex;flex-direction:column;gap:12px;margin-top:32px}
+.faq-item{background:#fff;border:1.5px solid #dde8e8;border-radius:10px;padding:22px 24px}
+.faq-q{font-size:15px;font-weight:600;color:var(--dark);margin-bottom:8px}
+.faq-a{font-size:13.5px;color:#666;line-height:1.7}
+/* CTA */
+.cta{background:var(--dark);padding:70px 40px;text-align:center;color:#fff}
+.cta h2{font-family:'Playfair Display',serif;font-size:38px;margin-bottom:10px}
+.cta h2 em{color:#7ecece;font-style:italic}
+.cta p{font-size:15px;color:#9ecece;max-width:480px;margin:0 auto 28px;line-height:1.65}
+.btn-outline{border:2px solid #fff;color:#fff;background:transparent;padding:12px 26px;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;text-decoration:none;display:inline-block}
+.btn-outline:hover{background:#fff;color:var(--teal)}
+/* FOOTER */
+footer{background:#050f0f;padding:50px 40px 24px;color:#fff}
+.footer-inner{display:grid;grid-template-columns:260px 1fr 1fr 1fr;gap:40px;margin-bottom:40px}
+.footer-logo{font-family:'Playfair Display',serif;font-size:20px;color:#fff;margin-bottom:12px}
+.footer-desc{font-size:13px;color:#7a9a9a;line-height:1.65;margin-bottom:18px}
+.footer-locs{font-size:13px;color:#9ecece;line-height:2}
+.footer-col h4{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#7ecece;margin-bottom:16px}
+.footer-col ul{list-style:none}
+.footer-col ul li{margin-bottom:8px}
+.footer-col ul li a{text-decoration:none;font-size:13px;color:#9ecece;transition:color .2s}
+.footer-col ul li a:hover{color:#fff}
+.footer-bottom{border-top:1px solid rgba(255,255,255,.08);padding-top:20px;display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#556}
+.footer-bottom a{color:#7ecece;text-decoration:none}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div style="display:flex;gap:30px">
+    <span>📍 3 Locations in Minnesota</span>
+    <span>📅 Mon-Fri, flexible appointments</span>
+  </div>
+  <span>Toll Free: <strong>(800) 660-9804</strong></span>
+</div>
+<nav>
+  <div class="logo">
+    <div class="logo-icon">🦻</div>
+    <div class="logo-text">The<br><strong>Hearing Aid Doctor</strong><span>Minnesota's Hearing Care Professionals</span></div>
+  </div>
+  <ul class="nav-links">
+    <li><a href="/">Home</a></li>
+    <li><a href="/services.html" class="active">Hearing Aid Solutions</a></li>
+    <li><a href="/hearing-test.html">Hearing Test</a></li>
+    <li><a href="/about.html">About Us</a></li>
+    <li><a href="/#contact" style="color:var(--teal)">Contact Us</a></li>
+  </ul>
+  <a href="/#contact" class="btn-primary">Request a Call Back</a>
+</nav>
+
+<div class="page-hero">
+  <div class="eyebrow">What We Offer</div>
+  <h1>Hearing Aid <em style="color:#7ecece;font-style:italic">Solutions</em></h1>
+  <p>From your first hearing test through ongoing support — expert, personal care at all three of our Southern Minnesota locations.</p>
+</div>
+
+<section class="section" style="background:var(--gray)">
+  <div class="section-inner">
+    <div class="section-eyebrow" style="justify-content:center">Our Services</div>
+    <h2 style="font-family:'Playfair Display',serif;font-size:36px;color:var(--dark);text-align:center">Comprehensive Hearing <em style="color:var(--teal);font-style:italic">Care</em></h2>
+    <p style="text-align:center;font-size:15px;color:#666;margin-top:8px;max-width:540px;margin-left:auto;margin-right:auto">We match the right solution to you — not the other way around.</p>
+    <div class="service-grid">
+      <div class="service-card">
+        <div class="service-img">👂</div>
+        <div class="service-body">
+          <h3>Hearing Evaluation</h3>
+          <p>A thorough audiometric assessment covering all frequencies. We build a complete picture of your hearing profile before recommending any device.</p>
+          <a href="/hearing-test.html" class="learn-btn">Learn more →</a>
+        </div>
+      </div>
+      <div class="service-card">
+        <div class="service-img">🎧</div>
+        <div class="service-body">
+          <h3>Hearing Aid Fitting</h3>
+          <p>We carry all major brands and match the right technology to your hearing loss, lifestyle, and budget. No upselling — just the right fit.</p>
+          <a href="/#contact" class="learn-btn">Book a fitting →</a>
+        </div>
+      </div>
+      <div class="service-card">
+        <div class="service-img">🔧</div>
+        <div class="service-body">
+          <h3>Repairs &amp; Servicing</h3>
+          <p>On-site cleaning, adjustments, and repairs for all major brands. Free lifetime adjustments for patients fitted at our practice.</p>
+          <a href="/#contact" class="learn-btn">Schedule service →</a>
+        </div>
+      </div>
+      <div class="service-card">
+        <div class="service-img">🤝</div>
+        <div class="service-body">
+          <h3>Ongoing Support</h3>
+          <p>Doug and Ariana work with manufacturer audiologists at every stage — from fitting through fine-tuning and long-term care.</p>
+          <a href="/about.html" class="learn-btn">About our team →</a>
+        </div>
+      </div>
+      <div class="service-card">
+        <div class="service-img">🎵</div>
+        <div class="service-body">
+          <h3>Tinnitus Treatment</h3>
+          <p>Customized tinnitus management programs using the latest sound therapy and hearing aid technology to reduce ringing and improve quality of life.</p>
+          <a href="/#contact" class="learn-btn">Ask about tinnitus →</a>
+        </div>
+      </div>
+      <div class="service-card">
+        <div class="service-img">📱</div>
+        <div class="service-body">
+          <h3>Assistive Devices</h3>
+          <p>Amplified phones, TV listeners, alerting systems, and other assistive listening devices to keep you connected at home and at work.</p>
+          <a href="/#contact" class="learn-btn">See options →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" style="background:#fff">
+  <div class="section-inner">
+    <div class="section-eyebrow" style="justify-content:center">How It Works</div>
+    <h2 style="font-family:'Playfair Display',serif;font-size:36px;color:var(--dark);text-align:center">Your Path to <em style="color:var(--teal);font-style:italic">Better Hearing</em></h2>
+    <div class="process-steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <h4>Free Consultation</h4>
+        <p>Call or fill out our contact form to schedule your no-obligation evaluation at any location.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <h4>Hearing Evaluation</h4>
+        <p>A complete audiometric test by our licensed specialists — no pressure, no rush.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <h4>Device Matching</h4>
+        <p>We recommend the right hearing aid based on your test results, lifestyle, and preferences.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <h4>Lifetime Support</h4>
+        <p>Free adjustments, cleanings, and check-ins for as long as you're our patient.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="brands-section">
+  <div class="brands-label">Brands We Carry</div>
+  <div class="brands-list">
+    <span class="brand">Phonak</span><span class="brand">Signia</span><span class="brand">Oticon</span><span class="brand">Widex</span><span class="brand">Starkey</span><span class="brand">ReSound</span><span class="brand">Unitron</span><span class="brand">Bernafon</span><span class="brand">Lyric</span><span class="brand">Jabra Enhance</span>
+  </div>
+</div>
+
+<section class="section" style="background:var(--gray)">
+  <div class="section-inner" style="max-width:740px">
+    <div class="section-eyebrow" style="justify-content:center">FAQ</div>
+    <h2 style="font-family:'Playfair Display',serif;font-size:36px;color:var(--dark);text-align:center">Common <em style="color:var(--teal);font-style:italic">Questions</em></h2>
+    <div class="faq-list">
+      <div class="faq-item">
+        <div class="faq-q">How do I know if I need a hearing aid?</div>
+        <div class="faq-a">If you regularly ask people to repeat themselves, struggle to follow conversations in noisy environments, or turn the TV up louder than others prefer, a hearing evaluation is a great first step. Our evaluation is free and there's no obligation to purchase.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Do you accept insurance?</div>
+        <div class="faq-a">Many insurance plans, including Medicare Advantage plans, offer hearing aid benefits. We'll help you understand what's covered before you commit to anything.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">How long do hearing aids last?</div>
+        <div class="faq-a">Most modern hearing aids last 5–7 years with proper care. We provide free cleanings and adjustments throughout the life of your device to keep them performing at their best.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Can I try hearing aids before buying?</div>
+        <div class="faq-a">Yes. We offer trial periods so you can experience improved hearing in your everyday environments before making a final decision.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="cta">
+  <div class="section-eyebrow" style="justify-content:center;color:#7ecece;margin-bottom:12px">Get Started</div>
+  <h2>Ready to Hear <em>Better?</em></h2>
+  <p>Book your free hearing evaluation today at Lakeville, Northfield, or Stewartville.</p>
+  <div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap">
+    <a href="/#contact" class="btn-primary" style="padding:13px 28px">📞 Request a Call Back</a>
+    <a href="/hearing-test.html" class="btn-outline" style="padding:13px 28px">Learn About Our Tests →</a>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-inner">
+    <div>
+      <div class="footer-logo">🦻 The Hearing Aid Doctor</div>
+      <p class="footer-desc">Professional hearing care across three Minnesota locations.</p>
+      <div class="footer-locs">📍 Lakeville: (952) 255-8579<br>📍 Northfield: (507) 645-0860<br>📍 Stewartville: (507) 533-4099</div>
+    </div>
+    <div class="footer-col"><h4>Services</h4><ul><li><a href="/services.html">Hearing Aid Solutions</a></li><li><a href="/hearing-test.html">Hearing Test</a></li><li><a href="/services.html">Repairs &amp; Servicing</a></li><li><a href="/services.html">Tinnitus Treatment</a></li></ul></div>
+    <div class="footer-col"><h4>Locations</h4><ul><li><a href="/locations.html">Lakeville, MN</a></li><li><a href="/locations.html">Northfield, MN</a></li><li><a href="/locations.html">Stewartville, MN</a></li></ul></div>
+    <div class="footer-col"><h4>Company</h4><ul><li><a href="/about.html">About Us</a></li><li><a href="/about.html">Meet the Team</a></li><li><a href="/#contact">Contact Us</a></li></ul></div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 The Hearing Aid Doctor · All Rights Reserved</span>
+    <div style="display:flex;gap:16px"><a href="#">Privacy Policy</a><a href="#">Accessibility</a><span style="color:#334">Powered by eMod</span></div>
+  </div>
+</footer>
+</body>
+</html>
