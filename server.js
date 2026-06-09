@@ -25,7 +25,7 @@ const path    = require("path");
 const { URL } = require("url");
 
 /* ── CONFIG ── */
-const PORT = process.env.PORT || 3333;
+const PORT        = 3333;
 const ED_USER     = "admin";
 const ED_PASS     = "hearingdoctor2026";
 const SITE_FILE   = path.join(__dirname, "index.html");
@@ -136,6 +136,76 @@ function cleanHtml(html) {
     .replace(/<div class="ed-section-controls"[\s\S]*?<\/div>/g, "");
 }
 
+/* ── PAGE TEMPLATE GENERATOR ── */
+function getPageTemplate(name, template, copyHtml) {
+  if (template === "copy" && copyHtml && typeof copyHtml === "string") return copyHtml;
+  const title = name.charAt(0).toUpperCase() + name.slice(1).replace(/-/g, " ");
+  const year  = new Date().getFullYear();
+  if (template === "basic") {
+    return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${title}</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; color: #1c2b35; line-height: 1.6; }
+    header { background: #1c2b35; color: #fff; padding: 16px 32px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { font-size: 20px; font-weight: 700; text-decoration: none; color: #fff; }
+    nav a { color: rgba(255,255,255,.8); text-decoration: none; margin-left: 24px; font-size: 14px; transition: color .15s; }
+    nav a:hover { color: #fff; }
+    main { max-width: 1100px; margin: 0 auto; padding: 64px 32px; }
+    h1 { font-size: 2.5rem; color: #1c2b35; margin-bottom: 16px; }
+    p  { color: #6b7280; font-size: 1.1rem; line-height: 1.8; }
+    footer { background: #f8fafb; border-top: 1px solid #e5e7eb; padding: 24px 32px; text-align: center; color: #9ca3af; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <header>
+    <a class="brand" href="/">The Hearing Aid Doctor</a>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/about.html">About</a>
+      <a href="/contact.html">Contact</a>
+    </nav>
+  </header>
+  <main>
+    <h1>${title}</h1>
+    <p>Add your content here. Use the Site Editor to customize this page.</p>
+  </main>
+  <footer>
+    <p>&copy; ${year} The Hearing Aid Doctor. All rights reserved.</p>
+  </footer>
+</body>
+</html>`;
+  }
+  // blank
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${title}</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f9fafb; color: #1c2b35;
+           display: flex; align-items: center; justify-content: center; min-height: 100vh;
+           text-align: center; padding: 40px; }
+    h1 { font-size: 2rem; margin-bottom: 12px; }
+    p  { color: #6b7280; }
+    a  { color: #1e6b6b; }
+  </style>
+</head>
+<body>
+  <div>
+    <h1>${title}</h1>
+    <p>This is a new blank page. Open the <a href="/admin">Site Editor</a> to customize it.</p>
+  </div>
+</body>
+</html>`;
+}
+
 /* ── BACKUP index.html, KEEP LAST 15 ── */
 function backupSite() {
   if (!fs.existsSync(SITE_FILE)) return;
@@ -188,6 +258,23 @@ const server = http.createServer(async (req, res) => {
       return;
     }
 
+    /* ─── GET /pages ─── list all HTML pages (excludes editor.html) */
+    if (req.method === "GET" && pathname === "/pages") {
+      const excluded = new Set(["editor.html"]);
+      const pages = fs.readdirSync(__dirname)
+        .filter(f => f.endsWith(".html") && !excluded.has(f) && !f.startsWith("."))
+        .filter(f => fs.statSync(path.join(__dirname, f)).isFile())
+        .sort((a, b) => {
+          if (a === "index.html") return -1;
+          if (b === "index.html") return  1;
+          return a.localeCompare(b);
+        })
+        .map(f => ({ name: f, path: "/" + f, isHome: f === "index.html" }));
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ ok: true, pages }));
+      return;
+    }
+
     /* ─── GET /images ─── list uploaded images (media gallery) */
     if (req.method === "GET" && pathname === "/images") {
       const images = fs.readdirSync(UPLOADS_DIR)
@@ -222,16 +309,45 @@ const server = http.createServer(async (req, res) => {
       try   { payload = JSON.parse(buf.toString("utf8")); }
       catch { res.writeHead(400, {"Content-Type":"application/json"}); res.end(JSON.stringify({error:"Invalid JSON"})); return; }
 
-      const { html } = payload;
+      const { html, page } = payload;
       if (!html || typeof html !== "string") {
         res.writeHead(400, { "Content-Type": "application/json" });
         res.end(JSON.stringify({ error: "Missing html field" }));
         return;
       }
-      backupSite();
-      const clean = cleanHtml(html);
-      fs.writeFileSync(SITE_FILE, clean, "utf8");
-      console.log(`[${new Date().toLocaleTimeString()}] ✅ Saved index.html (${(clean.length/1024).toFixed(1)} KB)`);
+
+      // Determine target file — default to index.html, support other .html pages
+      let targetFile = SITE_FILE;
+      if (page && typeof page === "string") {
+        const normalizedPage = page.replace(/^\/+/, "");
+        if (
+          normalizedPage &&
+          normalizedPage.endsWith(".html") &&
+          !normalizedPage.includes("/") &&
+          !normalizedPage.includes("\\") &&
+          !normalizedPage.includes("..") &&
+          normalizedPage !== "editor.html"
+        ) {
+          const candidate = path.join(__dirname, normalizedPage);
+          if (candidate.startsWith(__dirname + path.sep) || candidate === path.join(__dirname, normalizedPage)) {
+            targetFile = candidate;
+          }
+        }
+      }
+
+      // Backup before saving
+      if (targetFile === SITE_FILE) {
+        backupSite();
+      } else if (fs.existsSync(targetFile)) {
+        const ts       = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
+        const baseName = path.basename(targetFile, ".html");
+        try { fs.copyFileSync(targetFile, path.join(BACKUPS_DIR, `backup-${baseName}-${ts}.html`)); } catch {}
+      }
+
+      const clean      = cleanHtml(html);
+      const targetName = path.basename(targetFile);
+      fs.writeFileSync(targetFile, clean, "utf8");
+      console.log(`[${new Date().toLocaleTimeString()}] ✅ Saved ${targetName} (${(clean.length/1024).toFixed(1)} KB)`);
       res.writeHead(200, { "Content-Type": "application/json" });
       res.end(JSON.stringify({ ok: true, size: clean.length }));
       return;
@@ -262,6 +378,72 @@ const server = http.createServer(async (req, res) => {
       return;
     }
 
+    /* ─── POST /page/create ─── create a new HTML page */
+    if (req.method === "POST" && pathname === "/page/create") {
+      const buf = await collectBody(req);
+      let payload;
+      try   { payload = JSON.parse(buf.toString("utf8")); }
+      catch { res.writeHead(400, {"Content-Type":"application/json"}); res.end(JSON.stringify({error:"Invalid JSON"})); return; }
+
+      const { name, template, copyHtml } = payload;
+      if (!name || typeof name !== "string") {
+        res.writeHead(400, {"Content-Type":"application/json"}); res.end(JSON.stringify({error:"Missing name"})); return;
+      }
+      const safeName = name.toLowerCase().replace(/[^a-z0-9-]/g,"-").replace(/-+/g,"-").replace(/^-|-$/g,"") + ".html";
+      if (!safeName.endsWith(".html") || safeName.length < 6) {
+        res.writeHead(400, {"Content-Type":"application/json"}); res.end(JSON.stringify({error:"Invalid page name"})); return;
+      }
+      if (safeName === "editor.html" || safeName === "index.html") {
+        res.writeHead(400, {"Content-Type":"application/json"}); res.end(JSON.stringify({error:"Reserved filename — choose a different name"})); return;
+      }
+      const fp = path.join(__dirname, safeName);
+      if (!fp.startsWith(__dirname)) {
+        res.writeHead(400, {"Content-Type":"application/json"}); res.end(JSON.stringify({error:"Invalid path"})); return;
+      }
+      if (fs.existsSync(fp)) {
+        res.writeHead(409, {"Content-Type":"application/json"}); res.end(JSON.stringify({error:"Page already exists: /" + safeName})); return;
+      }
+      const pageName = safeName.replace(".html","");
+      const html = getPageTemplate(pageName, template || "blank", copyHtml || null);
+      fs.writeFileSync(fp, html, "utf8");
+      console.log(`[${new Date().toLocaleTimeString()}] 📄 Created page: ${safeName}`);
+      res.writeHead(200, {"Content-Type":"application/json"});
+      res.end(JSON.stringify({ ok: true, path: "/" + safeName, name: safeName }));
+      return;
+    }
+
+    /* ─── POST /page/delete ─── delete a page (backed up first) */
+    if (req.method === "POST" && pathname === "/page/delete") {
+      const buf = await collectBody(req);
+      let payload;
+      try   { payload = JSON.parse(buf.toString("utf8")); }
+      catch { res.writeHead(400, {"Content-Type":"application/json"}); res.end(JSON.stringify({error:"Invalid JSON"})); return; }
+
+      const { path: pagePath } = payload;
+      if (!pagePath || typeof pagePath !== "string") {
+        res.writeHead(400, {"Content-Type":"application/json"}); res.end(JSON.stringify({error:"Missing path"})); return;
+      }
+      const safeName = path.basename(pagePath);
+      if (safeName === "index.html" || safeName === "editor.html") {
+        res.writeHead(403, {"Content-Type":"application/json"}); res.end(JSON.stringify({error:"Cannot delete this page"})); return;
+      }
+      if (!safeName.endsWith(".html")) {
+        res.writeHead(400, {"Content-Type":"application/json"}); res.end(JSON.stringify({error:"Not an HTML page"})); return;
+      }
+      const fp = path.join(__dirname, safeName);
+      if (!fp.startsWith(__dirname) || !fs.existsSync(fp) || !fs.statSync(fp).isFile()) {
+        res.writeHead(404, {"Content-Type":"application/json"}); res.end(JSON.stringify({error:"Page not found: " + pagePath})); return;
+      }
+      // Back up before deleting
+      const ts = new Date().toISOString().replace(/[:.]/g,"-").slice(0,19);
+      try { fs.copyFileSync(fp, path.join(BACKUPS_DIR, `deleted-${safeName}-${ts}.html`)); } catch {}
+      fs.unlinkSync(fp);
+      console.log(`[${new Date().toLocaleTimeString()}] 🗑 Deleted page: ${safeName}`);
+      res.writeHead(200, {"Content-Type":"application/json"});
+      res.end(JSON.stringify({ ok: true, deleted: pagePath }));
+      return;
+    }
+
     /* ─── GET * ─── static file fallback (CSS, JS, fonts, images, etc.) */
     if (req.method === "GET") {
       const safe = path.normalize(pathname).replace(/^(\.\.(\/|\\|$))+/, "");
@@ -287,6 +469,7 @@ const server = http.createServer(async (req, res) => {
   }
 });
 
+
 /* ── START ── */
 server.listen(PORT, () => {
   console.log("");
@@ -308,6 +491,7 @@ server.listen(PORT, () => {
   console.log("");
 });
 
+
 server.on("error", e => {
   if (e.code === "EADDRINUSE") {
     console.error(`\n  ❌  Port ${PORT} is already in use.`);
@@ -316,3 +500,4 @@ server.on("error", e => {
     console.error("\n  ❌  Server error:", e.message);
   }
 });
+
