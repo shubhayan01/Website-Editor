@@ -676,8 +676,3 @@ img[src*="card-hearing-test"],
 img[src*="diff-consult"],
 img[src*="diff-male"],
 img[src*="about-exam"] { object-position: center right; }
-
-/* Headshots: anchor crop to the top so faces aren't cut off by object-fit: cover */
-.team-card .photo img {
-  object-position: center top;
-}
