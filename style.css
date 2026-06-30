@@ -655,3 +655,13 @@ footer.site-footer { background: var(--navy-deep); color: #9cb0b5; padding: 56px
 .diff-photos img { border-radius: 10px; width: 100%; height: 170px; object-fit: cover; display: block; }
 .diff-photos .ph2 { height: 210px; }
 .model-card .photo { overflow: hidden; border-radius: 8px; }
+
+/* Keep the subject in frame for off-centre real photos */
+.hero-media img { object-position: center right; }
+img[src*="card-hearing-aids"],
+img[src*="card-hearing-test"],
+img[src*="diff-consult"],
+img[src*="diff-male"],
+img[src*="about-exam"],
+img[src*="team-mark"] { object-position: center right; }
+.brand img { display: block; }
